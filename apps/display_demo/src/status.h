@@ -1,0 +1,9 @@
+#ifndef MICRO_ROS_ZEPHYR_DISPLAY_DEMO_STATUS_H
+#define MICRO_ROS_ZEPHYR_DISPLAY_DEMO_STATUS_H
+
+#include <zephyr.h>
+
+typedef enum { STATUS_STARTING, STATUS_RUNNING, STATUS_ERROR } status_t;
+extern atomic_t status;
+
+#endif  // MICRO_ROS_ZEPHYR_DISPLAY_DEMO_STATUS_H

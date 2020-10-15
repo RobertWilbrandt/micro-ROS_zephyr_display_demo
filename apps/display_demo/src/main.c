@@ -2,22 +2,21 @@
 #include <rclc/rclc.h>
 #include <zephyr.h>
 
-#define RCCHECK(fn)                                                 \
-  {                                                                 \
-    rcl_ret_t temp_rc = fn;                                         \
-    if ((temp_rc != RCL_RET_OK)) {                                  \
-      printf("Failed status on line %d: %d. Aborting.\n", __LINE__, \
-             (int)temp_rc);                                         \
-      return;                                                       \
-    }                                                               \
+#include "status.h"
+
+#define RCCHECK(fn)                      \
+  {                                      \
+    rcl_ret_t temp_rc = fn;              \
+    if ((temp_rc != RCL_RET_OK)) {       \
+      atomic_set(&status, STATUS_ERROR); \
+      return;                            \
+    }                                    \
   }
-#define RCSOFTCHECK(fn)                                               \
-  {                                                                   \
-    rcl_ret_t temp_rc = fn;                                           \
-    if ((temp_rc != RCL_RET_OK)) {                                    \
-      printf("Failed status on line %d: %d. Continuing.\n", __LINE__, \
-             (int)temp_rc);                                           \
-    }                                                                 \
+#define RCSOFTCHECK(fn)            \
+  {                                \
+    rcl_ret_t temp_rc = fn;        \
+    if ((temp_rc != RCL_RET_OK)) { \
+    }                              \
   }
 
 void main(void) {
@@ -30,6 +29,7 @@ void main(void) {
   RCCHECK(rclc_node_init_default(&node, "microros_zephyr_display_demo", "",
                                  &support));
 
+  atomic_set(&status, STATUS_RUNNING);
   while (1) {
     k_msleep(1000);
   }
