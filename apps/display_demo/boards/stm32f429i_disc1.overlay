@@ -1,0 +1,6 @@
+/ {
+  aliases {
+    status-led = &orange_led_3;
+    error-led = &green_led_4;
+  };
+};
