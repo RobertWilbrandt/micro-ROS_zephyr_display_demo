@@ -3,6 +3,10 @@
 #include <drivers/gpio.h>
 #include <zephyr.h>
 
+atomic_t status = ATOMIC_INIT(STATUS_STARTING);
+
+#if defined(CONFIG_GPIO) && (CONFIG_GPIO == 1)
+
 #define STATUS_LED_THREAD_STACK_SIZE 512
 #define STATUS_LED_THREAD_PRIORITY CONFIG_MAIN_THREAD_PRIORITY
 
@@ -15,8 +19,6 @@
 #define ERROR_LED_LABEL DT_GPIO_LABEL(ERROR_LED_NODE, gpios)
 #define ERROR_LED_PIN DT_GPIO_PIN(ERROR_LED_NODE, gpios)
 #define ERROR_LED_FLAGS DT_GPIO_FLAGS(ERROR_LED_NODE, gpios)
-
-atomic_t status = ATOMIC_INIT(STATUS_STARTING);
 
 void status_led_thread(void *param1, void *param2, void *param3);
 K_THREAD_DEFINE(status_led_thread_tid, STATUS_LED_THREAD_STACK_SIZE,
@@ -85,3 +87,5 @@ void status_led_thread(void *param1, void *param2, void *param3) {
     }
   }
 }
+
+#endif
