@@ -20,10 +20,28 @@
   }
 
 void main(void) {
-  // Initialize micro-ROS
   rcl_allocator_t allocator = rcl_get_default_allocator();
+
+  // Initialize support. The loop with error handling is required, as the
+  // initialization will fail after some time if no agent is connected
+  // (on my stm32f429i-disc1 after ~55 seconds).
   rclc_support_t support;
-  RCCHECK(rclc_support_init(&support, 0, NULL, &allocator));
+  while (true) {
+    rcl_ret_t support_init_ret =
+        rclc_support_init(&support, 0, NULL, &allocator);
+
+    if (support_init_ret == RCL_RET_OK) {
+      break;
+    } else {
+      rclc_support_fini(&support);
+      if (support_init_ret != RCL_RET_ERROR) {
+        atomic_set(&status, STATUS_ERROR);
+        return;
+      }
+    }
+
+    k_msleep(100);
+  }
 
   rcl_node_t node = rcl_get_zero_initialized_node();
   RCCHECK(rclc_node_init_default(&node, "microros_zephyr_display_demo", "",
@@ -35,4 +53,5 @@ void main(void) {
   }
 
   RCCHECK(rcl_node_fini(&node));
+  RCCHECK(rclc_support_fini(&support));
 }
