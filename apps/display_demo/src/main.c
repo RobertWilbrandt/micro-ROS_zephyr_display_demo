@@ -20,6 +20,8 @@
   }
 
 void main(void) {
+  atomic_set(&status, STATUS_CONNECTING);
+
   rcl_allocator_t allocator = rcl_get_default_allocator();
 
   // Initialize support. The loop with error handling is required, as the

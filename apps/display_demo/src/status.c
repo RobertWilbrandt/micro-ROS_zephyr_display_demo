@@ -39,6 +39,10 @@ void status_led_thread(void *param1, void *param2, void *param3) {
   UNUSED(param2);
   UNUSED(param3);
 
+  while (atomic_get(&status) == STATUS_STARTING) {
+    k_msleep(10);
+  }
+
   const struct device *status_led_dev = device_get_binding(STATUS_LED_LABEL);
   if (gpio_pin_configure(status_led_dev, STATUS_LED_PIN,
                          GPIO_OUTPUT_ACTIVE | STATUS_LED_FLAGS) != 0) {
@@ -54,17 +58,17 @@ void status_led_thread(void *param1, void *param2, void *param3) {
 
   while (true) {
     switch (atomic_get(&status)) {
-      case STATUS_STARTING:
-        status_led_blink_step(status_led_dev, false, STATUS_STARTING);
-        status_led_blink_step(status_led_dev, true, STATUS_STARTING);
-        status_led_blink_step(status_led_dev, false, STATUS_STARTING);
-        status_led_blink_step(status_led_dev, true, STATUS_STARTING);
-        status_led_blink_step(status_led_dev, false, STATUS_STARTING);
-        status_led_blink_step(status_led_dev, false, STATUS_STARTING);
-        status_led_blink_step(status_led_dev, false, STATUS_STARTING);
-        status_led_blink_step(status_led_dev, false, STATUS_STARTING);
-        status_led_blink_step(status_led_dev, false, STATUS_STARTING);
-        status_led_blink_step(status_led_dev, false, STATUS_STARTING);
+      case STATUS_CONNECTING:
+        status_led_blink_step(status_led_dev, false, STATUS_CONNECTING);
+        status_led_blink_step(status_led_dev, true, STATUS_CONNECTING);
+        status_led_blink_step(status_led_dev, false, STATUS_CONNECTING);
+        status_led_blink_step(status_led_dev, true, STATUS_CONNECTING);
+        status_led_blink_step(status_led_dev, false, STATUS_CONNECTING);
+        status_led_blink_step(status_led_dev, false, STATUS_CONNECTING);
+        status_led_blink_step(status_led_dev, false, STATUS_CONNECTING);
+        status_led_blink_step(status_led_dev, false, STATUS_CONNECTING);
+        status_led_blink_step(status_led_dev, false, STATUS_CONNECTING);
+        status_led_blink_step(status_led_dev, false, STATUS_CONNECTING);
         break;
 
       case STATUS_RUNNING:

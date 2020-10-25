@@ -3,7 +3,12 @@
 
 #include <zephyr.h>
 
-typedef enum { STATUS_STARTING, STATUS_RUNNING, STATUS_ERROR } status_t;
+typedef enum {
+  STATUS_STARTING,
+  STATUS_CONNECTING,
+  STATUS_RUNNING,
+  STATUS_ERROR
+} status_t;
 extern atomic_t status;
 
 #endif  // MICRO_ROS_ZEPHYR_DISPLAY_DEMO_STATUS_H
