@@ -27,8 +27,12 @@ K_THREAD_DEFINE(uros_thread_tid, UROS_THREAD_STACK_SIZE, &uros_thread, NULL,
                 NULL, NULL, UROS_THREAD_PRIORITY, 0, 0);
 
 void uros_thread(void *param1, void *param2, void *param3) {
+  (void)param1;
+  (void)param2;
+  (void)param3;
+
   while (atomic_get(&status) == STATUS_STARTING) {
-    k_msleep(10);
+    k_sleep(K_MSEC(10));
   }
 
   rcl_allocator_t allocator = rcl_get_default_allocator();
@@ -51,7 +55,7 @@ void uros_thread(void *param1, void *param2, void *param3) {
       }
     }
 
-    k_msleep(100);
+    k_sleep(K_MSEC(100));
   }
 
   rcl_node_t node = rcl_get_zero_initialized_node();
@@ -60,7 +64,7 @@ void uros_thread(void *param1, void *param2, void *param3) {
 
   atomic_set(&status, STATUS_RUNNING);
   while (1) {
-    k_msleep(1000);
+    k_sleep(K_MSEC(1000));
   }
 
   RCCHECK(rcl_node_fini(&node));

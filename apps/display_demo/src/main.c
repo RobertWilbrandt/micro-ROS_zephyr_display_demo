@@ -4,6 +4,6 @@ void main(void) {
   atomic_set(&status, STATUS_CONNECTING);
 
   while (true) {
-    k_msleep(100);
+    k_sleep(K_MSEC(1000));
   }
 }

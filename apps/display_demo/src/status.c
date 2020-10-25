@@ -8,7 +8,7 @@ atomic_t status = ATOMIC_INIT(STATUS_STARTING);
 #if defined(CONFIG_GPIO) && (CONFIG_GPIO == 1)
 
 #define STATUS_LED_THREAD_STACK_SIZE 512
-#define STATUS_LED_THREAD_PRIORITY CONFIG_MAIN_THREAD_PRIORITY
+#define STATUS_LED_THREAD_PRIORITY 3
 
 #define STATUS_LED_NODE DT_ALIAS(status_led)
 #define STATUS_LED_LABEL DT_GPIO_LABEL(STATUS_LED_NODE, gpios)
@@ -31,16 +31,16 @@ void status_led_blink_step(const struct device *status_led_dev, bool status_on,
     return;
   }
   gpio_pin_set(status_led_dev, STATUS_LED_PIN, (int)status_on);
-  k_msleep(100);
+  k_sleep(K_MSEC(100));
 }
 
 void status_led_thread(void *param1, void *param2, void *param3) {
-  UNUSED(param1);
-  UNUSED(param2);
-  UNUSED(param3);
+  (void)param1;
+  (void)param2;
+  (void)param3;
 
   while (atomic_get(&status) == STATUS_STARTING) {
-    k_msleep(10);
+    k_sleep(K_MSEC(10));
   }
 
   const struct device *status_led_dev = device_get_binding(STATUS_LED_LABEL);
