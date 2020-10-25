@@ -4,10 +4,10 @@
 #include <zephyr.h>
 
 typedef enum {
-  STATUS_STARTING,
-  STATUS_CONNECTING,
-  STATUS_RUNNING,
-  STATUS_ERROR
+  STATUS_STARTING = 0,
+  STATUS_CONNECTING = 1,
+  STATUS_RUNNING = 2,
+  STATUS_ERROR = 3
 } status_t;
 extern atomic_t status;
 
