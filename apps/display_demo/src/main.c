@@ -1,3 +1,5 @@
+#include <zephyr.h>
+
 #include "display.h"
 #include "status.h"
 
@@ -9,8 +11,14 @@ void main(void) {
     return;
   }
 
+  // Use a timer instead of sleeps to ensure a consistent update rate
+  // independent of processing time
+  struct k_timer display_update_timer;
+  k_timer_init(&display_update_timer, NULL, NULL);
+  k_timer_start(&display_update_timer, K_MSEC(25), K_MSEC(25));
+
   while (true) {
+    k_timer_status_sync(&display_update_timer);
     display_update();
-    k_sleep(K_MSEC(25));
   }
 }
