@@ -11,6 +11,6 @@ void main(void) {
 
   while (true) {
     display_update();
-    k_sleep(K_MSEC(1000));
+    k_sleep(K_MSEC(25));
   }
 }
