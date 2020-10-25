@@ -8,7 +8,7 @@ endif()
 include($ENV{ZEPHYR_BASE}/cmake/app/boilerplate.cmake NO_POLICY_SCOPE)
 project(microrosapp C CXX)
 
-target_sources(app PRIVATE src/main.c src/status.c src/status.h)
+target_sources(app PRIVATE src/main.c src/status.c src/status.h src/uros.c)
 
 zephyr_get_include_directories_for_lang_as_string(C includes)
 zephyr_get_system_include_directories_for_lang_as_string(C system_includes)
