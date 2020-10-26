@@ -3,6 +3,7 @@
 #include <device.h>
 #include <drivers/display.h>
 #include <lvgl.h>
+#include <stdio.h>
 #include <string.h>
 #include <zephyr.h>
 
@@ -11,7 +12,13 @@
 const struct device *display_dev;
 status_t last_status;
 
+const char uptime_format[] = "%03d:%02d:%02d.%d";
+char uptime_text[12];
+lv_obj_t *uptime_label;
+
 lv_obj_t *status_elems[4][2];
+
+void update_uptime_label();
 
 bool display_init() {
   display_dev = device_get_binding(CONFIG_LVGL_DISPLAY_DEV_NAME);
@@ -22,15 +29,23 @@ bool display_init() {
   last_status = STATUS_CONNECTING;
   memset(status_elems, (int)NULL, sizeof(lv_obj_t *) * 4 * 2);
 
-  // Create Bottom-Left MicroROS label
-  lv_obj_t *micro_ros_label = lv_label_create(lv_scr_act(), NULL);
-  lv_label_set_text(micro_ros_label, "MicroROS");
-  lv_obj_align(micro_ros_label, NULL, LV_ALIGN_IN_BOTTOM_LEFT, 10, -10);
-
-  // Create Bottom-Right demo name label
+  // Create demo name label
   lv_obj_t *demo_name_label = lv_label_create(lv_scr_act(), NULL);
   lv_label_set_text(demo_name_label, "Zephyr Display Demo");
-  lv_obj_align(demo_name_label, NULL, LV_ALIGN_IN_BOTTOM_RIGHT, -10, -10);
+  lv_obj_align(demo_name_label, NULL, LV_ALIGN_IN_BOTTOM_LEFT, 10, -10);
+
+  // Create MicroROS label
+  lv_obj_t *micro_ros_label = lv_label_create(lv_scr_act(), NULL);
+  lv_label_set_text(micro_ros_label, "MicroROS");
+  lv_obj_align(micro_ros_label, demo_name_label, LV_ALIGN_OUT_TOP_LEFT, 0, -5);
+
+  // Create labels for system uptime
+  uptime_label = lv_label_create(lv_scr_act(), NULL);
+  update_uptime_label();
+
+  lv_obj_t *uptime_text_label = lv_label_create(lv_scr_act(), NULL);
+  lv_label_set_text(uptime_text_label, "Uptime");
+  lv_obj_align(uptime_text_label, uptime_label, LV_ALIGN_OUT_TOP_RIGHT, 0, -5);
 
   // Status CONNECTING: Create Top-Right spinner
   lv_obj_t *connecting_spinner = lv_spinner_create(lv_scr_act(), NULL);
@@ -93,8 +108,8 @@ bool display_init() {
 }
 
 void display_update() {
+  // Update status indicator
   status_t cur_status = atomic_get(&status);
-
   if (cur_status != last_status) {
     const size_t num_cols = sizeof(status_elems[0]) / sizeof(lv_obj_t *);
 
@@ -115,5 +130,23 @@ void display_update() {
     last_status = cur_status;
   }
 
+  // Update uptime
+  update_uptime_label();
+
+  // Update display
   lv_task_handler();
+}
+
+void update_uptime_label() {
+  const int64_t uptime = k_uptime_get();
+  const unsigned int milliseconds = uptime;
+  const unsigned int seconds = uptime / 1000;
+  const unsigned int minutes = seconds / 60;
+  const unsigned int hours = minutes / 60;
+
+  snprintf(uptime_text, sizeof(uptime_text) / sizeof(char), uptime_format,
+           hours % 1000, minutes % 60, seconds % 60,
+           (milliseconds % 1000) / 100);
+  lv_label_set_text(uptime_label, uptime_text);
+  lv_obj_align(uptime_label, NULL, LV_ALIGN_IN_BOTTOM_RIGHT, -10, -10);
 }
