@@ -1,0 +1,4 @@
+mainmenu "microROS_zephyr_display_demo"
+
+# This is required, as otherwise all other Kconfig definitions for the .prj files cannot be found
+source "Kconfig.zephyr"

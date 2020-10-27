@@ -1,7 +1,11 @@
+#include <drivers/sensor.h>
 #include <zephyr.h>
 
 #include "display.h"
 #include "status.h"
+
+#define GYRO_NODE DT_NODELABEL(l3gd20h1)
+#define GYRO_LABEL DT_LABEL(GYRO_NODE)
 
 void main(void) {
   atomic_set(&status, STATUS_CONNECTING);
@@ -9,6 +13,13 @@ void main(void) {
   if (!display_init()) {
     atomic_set(&status, STATUS_ERROR);
     return;
+  }
+
+  const struct device *gyro_dev = device_get_binding(GYRO_LABEL);
+  if (gyro_dev == NULL) {
+    atomic_set(&status, STATUS_ERROR);
+  } else {
+    sensor_sample_fetch(gyro_dev);
   }
 
   // Use a timer instead of sleeps to ensure a consistent update rate

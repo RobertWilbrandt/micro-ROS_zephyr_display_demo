@@ -2,5 +2,16 @@
   aliases {
     status-led = &orange_led_3;
     error-led = &green_led_4;
+    gyro = &l3gd20h1;
+  };
+};
+
+&spi5 {
+  l3gd20h1: l3gd20h@1 {
+    compatible = "st,l3gd20h";
+    label = "l3gd20h";
+    spi-max-freq = <15151515>;
+    reg = <1>;
+    status = "okay";
   };
 };
