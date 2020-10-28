@@ -26,10 +26,22 @@ static const struct sensor_driver_api l3gd20h_driver_api = {
     .channel_get = l3gd20h_channel_get,
 };
 
-int l3gd20h_init(const struct device *dev) { return 0; }
+int l3gd20h_init(const struct device *dev) {
+  struct l3gd20h_data *l3gd20h = dev->data;
+  return 0;
+}
 
-struct l3gd20h_data l3gd20h_driver;
+// This registers the driver correctly for a given instance, called for all
+// instances below
+#define L3GD20H_DEFINE(inst)                                              \
+  static struct l3gd20h_data l3gd20h_data_##inst;                         \
+  static const struct l3gd20h_config l3gd20h_config_##inst = {            \
+                                                                          \
+  };                                                                      \
+  DEVICE_AND_API_INIT(l3gd20h_##inst, DT_INST_LABEL(inst), &l3gd20h_init, \
+                      &l3gd20h_data_##inst, &l3gd20h_config_##inst,       \
+                      POST_KERNEL, CONFIG_SENSOR_INIT_PRIORITY,           \
+                      &l3gd20h_driver_api);
 
-DEVICE_AND_API_INIT(l3gd20h, DT_INST_LABEL(0), l3gd20h_init, &l3gd20h_driver,
-                    NULL, POST_KERNEL, CONFIG_SENSOR_INIT_PRIORITY,
-                    &l3gd20h_driver_api);
+// Create instances for each devicetree mention
+DT_INST_FOREACH_STATUS_OKAY(L3GD20H_DEFINE)
