@@ -1,3 +1,5 @@
+#include <dt-bindings/display/ili9340.h>
+
 / {
   aliases {
     status-led = &orange_led_3;
@@ -7,6 +9,11 @@
 };
 
 &spi5 {
+  ili9340@0 {
+    pixel-format = <ILI9340_PIXEL_FORMAT_RGB888>;
+    rotation = <90>;
+  };
+
   l3gd20h1: l3gd20h@1 {
     compatible = "st,l3gd20h";
     label = "l3gd20h";
