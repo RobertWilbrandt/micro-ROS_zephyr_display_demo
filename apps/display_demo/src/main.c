@@ -9,8 +9,10 @@
 #include "display.h"
 #include "status.h"
 
+#if defined(CONFIG_L3GD20) && (CONFIG_L3GD20 == 1)
 #define GYRO_NODE DT_NODELABEL(l3gd20)
 #define GYRO_LABEL DT_LABEL(GYRO_NODE)
+#endif
 
 void main(void)
 {
@@ -22,11 +24,13 @@ void main(void)
     return;
   }
 
+#if defined(CONFIG_L3GD20) && (CONFIG_L3GD20 == 1)
   const struct device* gyro_dev = device_get_binding(GYRO_LABEL);
   if (gyro_dev == NULL)
   {
     atomic_set(&status, STATUS_ERROR);
   }
+#endif
 
   // Use a timer instead of sleeps to ensure a consistent update rate
   // independent of processing time
