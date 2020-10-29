@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: BSD-3-Clause
+
 cmake_minimum_required(VERSION 3.13.1)
 
 set(COMPATIBLE_BOARDS stm32f429i_disc1 native_posix)

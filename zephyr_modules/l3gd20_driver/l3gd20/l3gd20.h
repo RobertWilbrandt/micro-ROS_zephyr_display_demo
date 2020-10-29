@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) 2020 Robert Wilbrandt
+ *
+ * SPDX-License-Identifier: BSD-3-Clause
+ */
 #ifndef MICRO_ROS_ZEPYR_DISPLAY_DEMO_DRIVERS_SENSORS_L3GD20_L3GD20_H
 #define MICRO_ROS_ZEPYR_DISPLAY_DEMO_DRIVERS_SENSORS_L3GD20_L3GD20_H
 

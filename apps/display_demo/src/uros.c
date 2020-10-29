@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) 2020 Robert Wilbrandt
+ *
+ * SPDX-License-Identifier: BSD-3-Clause
+ */
 #include <rcl/rcl.h>
 #include <rclc/rclc.h>
 #include <zephyr.h>

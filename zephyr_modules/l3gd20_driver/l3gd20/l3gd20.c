@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) 2020 Robert Wilbrandt
+ *
+ * SPDX-License-Identifier: BSD-3-Clause
+ */
 #define DT_DRV_COMPAT st_l3gd20
 
 #include "l3gd20.h"

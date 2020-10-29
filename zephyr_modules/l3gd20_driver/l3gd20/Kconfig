@@ -1,4 +1,7 @@
-# L3GD20 3-Axis Gyroscope configuration options
+# Copyright (c) 2020 Robert Wilbrandt
+# SPDX-License-Identifier: BSD-3-Clause
+#
+# L3GD20 3-axis gyroscope configuration options
 
 menuconfig L3GD20
   bool "L3GD20 3-Axis Gyroscope"

@@ -1,3 +1,9 @@
+/*
+ * Copyright (c) 2020 Robert Wilbrandt
+ *
+ * SPDX-License-Identifier: BSD-3-Clause
+ */
+
 #include <dt-bindings/display/ili9340.h>
 
 / {
