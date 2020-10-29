@@ -89,7 +89,7 @@ bool display_init() {
   lv_obj_set_style_local_bg_color(error_led, LV_LED_PART_MAIN, LV_STATE_DEFAULT,
                                   LV_COLOR_RED);
   lv_obj_set_size(error_led, 25, 25);
-  lv_obj_align(error_led, NULL, LV_ALIGN_IN_TOP_RIGHT, -10, 0);
+  lv_obj_align(error_led, NULL, LV_ALIGN_IN_TOP_RIGHT, -10, 10);
   lv_obj_set_hidden(error_led, true);
   status_elems[STATUS_ERROR][0] = error_led;
 
