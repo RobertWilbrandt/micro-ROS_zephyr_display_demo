@@ -8,7 +8,8 @@
 
 #include <zephyr.h>
 
-typedef enum {
+typedef enum
+{
   STATUS_STARTING = 0,
   STATUS_CONNECTING = 1,
   STATUS_RUNNING = 2,

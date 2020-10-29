@@ -17,17 +17,19 @@
 
 #define L3GD20_WHOAMI 0xD4
 
-struct l3gd20_data {
-  const struct device *bus;
+struct l3gd20_data
+{
+  const struct device* bus;
   struct spi_cs_control cs_ctrl;
 
   int16_t x_sample;
 };
 
-struct l3gd20_config {
+struct l3gd20_config
+{
   struct spi_config spi_conf;
-  const char *spi_bus_label;
-  const char *spi_cs_label;
+  const char* spi_bus_label;
+  const char* spi_cs_label;
 };
 
 #endif  // MICRO_ROS_ZEPYR_DISPLAY_DEMO_DRIVERS_SENSORS_L3GD20_L3GD20_H
