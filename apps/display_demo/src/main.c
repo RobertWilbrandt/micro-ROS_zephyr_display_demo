@@ -18,8 +18,6 @@ void main(void) {
   const struct device *gyro_dev = device_get_binding(GYRO_LABEL);
   if (gyro_dev == NULL) {
     atomic_set(&status, STATUS_ERROR);
-  } else {
-    sensor_sample_fetch(gyro_dev);
   }
 
   // Use a timer instead of sleeps to ensure a consistent update rate

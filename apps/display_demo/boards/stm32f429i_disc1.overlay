@@ -9,6 +9,9 @@
 };
 
 &spi5 {
+  cs-gpios = <&gpioc 2 GPIO_ACTIVE_LOW
+              &gpioc 1 GPIO_ACTIVE_LOW>;
+
   ili9340@0 {
     pixel-format = <ILI9340_PIXEL_FORMAT_RGB888>;
     rotation = <90>;
@@ -17,7 +20,7 @@
   l3gd20h1: l3gd20h@1 {
     compatible = "st,l3gd20h";
     label = "l3gd20h";
-    spi-max-frequency = <15151515>;
+    spi-max-frequency = <10000000>;
     reg = <1>;
     status = "okay";
   };
