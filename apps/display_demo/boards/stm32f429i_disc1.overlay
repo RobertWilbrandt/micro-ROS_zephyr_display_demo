@@ -4,7 +4,7 @@
   aliases {
     status-led = &orange_led_3;
     error-led = &green_led_4;
-    gyro = &l3gd20h1;
+    gyro = &l3gd20;
   };
 };
 
@@ -17,9 +17,9 @@
     rotation = <90>;
   };
 
-  l3gd20h1: l3gd20h@1 {
-    compatible = "st,l3gd20h";
-    label = "l3gd20h";
+  l3gd20: l3gd20@1 {
+    compatible = "st,l3gd20";
+    label = "l3gd20";
     spi-max-frequency = <10000000>;
     reg = <1>;
     status = "okay";

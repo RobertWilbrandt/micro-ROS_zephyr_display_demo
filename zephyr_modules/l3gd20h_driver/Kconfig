@@ -1,5 +1,0 @@
-if SENSOR
-
-rsource "l3gd20h/Kconfig"
-
-endif

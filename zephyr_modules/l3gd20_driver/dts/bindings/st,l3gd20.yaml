@@ -1,0 +1,5 @@
+description: STMicroelectronics L3GD20 3-axis gyroscope
+
+compatible: "st,l3gd20"
+
+include: spi-device.yaml

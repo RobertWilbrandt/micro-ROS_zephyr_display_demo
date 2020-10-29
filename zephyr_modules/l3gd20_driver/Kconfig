@@ -1,0 +1,5 @@
+if SENSOR
+
+rsource "l3gd20/Kconfig"
+
+endif

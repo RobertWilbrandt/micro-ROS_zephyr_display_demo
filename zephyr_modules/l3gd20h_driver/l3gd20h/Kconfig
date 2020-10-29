@@ -1,7 +1,0 @@
-# L3GD20H 3-Axis Gyroscope configuration options
-
-menuconfig L3GD20H
-  bool "L3GD20H 3-Axis Gyroscope"
-  depends on SPI
-  help
-    Enable SPI-based driver for the l3gd20h 3-axis gyroscope

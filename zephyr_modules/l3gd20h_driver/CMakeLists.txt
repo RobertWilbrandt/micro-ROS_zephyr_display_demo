@@ -1,1 +1,0 @@
-add_subdirectory_ifdef(CONFIG_L3GD20H l3gd20h)

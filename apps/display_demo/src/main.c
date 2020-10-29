@@ -4,7 +4,7 @@
 #include "display.h"
 #include "status.h"
 
-#define GYRO_NODE DT_NODELABEL(l3gd20h1)
+#define GYRO_NODE DT_NODELABEL(l3gd20)
 #define GYRO_LABEL DT_LABEL(GYRO_NODE)
 
 void main(void) {
