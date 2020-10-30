@@ -11,7 +11,7 @@ include($ENV{ZEPHYR_BASE}/cmake/app/boilerplate.cmake NO_POLICY_SCOPE)
 project(microrosapp C CXX)
 
 set(APP_SOURCES src/main.c src/status.c src/uros.c src/display.c)
-set(APP_HEADERS src/status.h src/display.h)
+set(APP_HEADERS src/status.h src/uros.h src/display.h)
 
 target_sources(app PRIVATE ${APP_HEADERS} ${APP_SOURCES})
 

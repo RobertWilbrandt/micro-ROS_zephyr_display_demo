@@ -25,12 +25,12 @@ lv_obj_t* status_elems[4][2];
 
 void update_uptime_label();
 
-bool display_init()
+int display_init()
 {
   display_dev = device_get_binding(CONFIG_LVGL_DISPLAY_DEV_NAME);
   if (display_dev == NULL)
   {
-    return false;
+    return -ENODEV;
   }
 
   last_status = STATUS_CONNECTING;
@@ -105,7 +105,7 @@ bool display_init()
   lv_task_handler();
   display_blanking_off(display_dev);
 
-  return true;
+  return 0;
 }
 
 void display_update()

@@ -17,4 +17,7 @@ typedef enum
 } status_t;
 extern atomic_t status;
 
+int status_init();
+int status_start();
+
 #endif  // MICRO_ROS_ZEPHYR_DISPLAY_DEMO_STATUS_H

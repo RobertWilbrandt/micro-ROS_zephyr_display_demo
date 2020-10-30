@@ -1,0 +1,7 @@
+#ifndef MICRO_ROS_ZEPHYR_DISPLAY_DEMO_UROS_H
+#define MICRO_ROS_ZEPHYR_DISPLAY_DEMO_UROS_H
+
+int uros_init();
+int uros_start();
+
+#endif  // MICRO_ROS_ZEPHYR_DISPLAY_DEMO_UROS_H

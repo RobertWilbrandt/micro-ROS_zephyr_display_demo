@@ -27,19 +27,28 @@
 
 #include "status.h"
 
+// Thread structures
 void uros_thread(void* param1, void* param2, void* param3);
-K_THREAD_DEFINE(uros_thread_tid, UROS_THREAD_STACK_SIZE, &uros_thread, NULL, NULL, NULL, UROS_THREAD_PRIORITY, 0, 0);
+K_THREAD_STACK_DEFINE(uros_thread_stack_area, UROS_THREAD_STACK_SIZE);
+struct k_thread uros_thread_stack_data;
+
+int uros_init()
+{
+  return 0;
+}
+
+int uros_start()
+{
+  k_thread_create(&uros_thread_stack_data, uros_thread_stack_area, K_THREAD_STACK_SIZEOF(uros_thread_stack_area),
+                  &uros_thread, NULL, NULL, NULL, UROS_THREAD_PRIORITY, 0, K_NO_WAIT);
+  return 0;
+}
 
 void uros_thread(void* param1, void* param2, void* param3)
 {
   (void)param1;
   (void)param2;
   (void)param3;
-
-  while (atomic_get(&status) == STATUS_STARTING)
-  {
-    k_sleep(K_MSEC(10));
-  }
 
   rcl_allocator_t allocator = rcl_get_default_allocator();
 
