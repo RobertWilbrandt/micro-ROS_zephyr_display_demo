@@ -15,12 +15,15 @@
 #include "status.h"
 
 const struct device* display_dev;
+struct k_mutex display_mut;
+
 status_t last_status;
 
 const char uptime_format[] = "%03d:%02d:%02d.%d";
 char uptime_text[12];
 lv_obj_t* uptime_label;
 
+lv_obj_t* gyro_label;
 lv_obj_t* status_elems[4][2];
 
 void update_uptime_label();
@@ -32,6 +35,8 @@ int display_init()
   {
     return -ENODEV;
   }
+
+  k_mutex_init(&display_mut);
 
   last_status = STATUS_CONNECTING;
   memset(status_elems, (int)NULL, sizeof(lv_obj_t*) * 4 * 2);
@@ -53,6 +58,10 @@ int display_init()
   lv_obj_t* uptime_text_label = lv_label_create(lv_scr_act(), NULL);
   lv_label_set_text(uptime_text_label, "Uptime");
   lv_obj_align(uptime_text_label, uptime_label, LV_ALIGN_OUT_TOP_RIGHT, 0, -5);
+
+  // Create gyro label
+  gyro_label = lv_label_create(lv_scr_act(), NULL);
+  lv_obj_set_hidden(gyro_label, true);
 
   // Status CONNECTING: Create Top-Right spinner
   lv_obj_t* connecting_spinner = lv_spinner_create(lv_scr_act(), NULL);
@@ -110,6 +119,8 @@ int display_init()
 
 void display_update()
 {
+  k_mutex_lock(&display_mut, K_FOREVER);
+
   // Update status indicator
   status_t cur_status = atomic_get(&status);
   if (cur_status != last_status)
@@ -137,11 +148,24 @@ void display_update()
     last_status = cur_status;
   }
 
+  k_mutex_unlock(&display_mut);
+
   // Update uptime
   update_uptime_label();
 
   // Update display
   lv_task_handler();
+}
+
+void display_set_label_gyro(const char* text)
+{
+  k_mutex_lock(&display_mut, K_FOREVER);
+
+  lv_label_set_text(gyro_label, text);
+  lv_obj_align(gyro_label, NULL, LV_ALIGN_IN_BOTTOM_MID, 0, -40);
+  lv_obj_set_hidden(gyro_label, false);
+
+  k_mutex_unlock(&display_mut);
 }
 
 void update_uptime_label()

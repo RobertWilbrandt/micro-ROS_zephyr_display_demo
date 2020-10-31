@@ -11,4 +11,6 @@
 int display_init();
 void display_update();
 
+void display_set_label_gyro(const char* text);
+
 #endif  // MICRO_ROS_ZEPHYR_DISPLAY_DEMO_DISPLAY_H
