@@ -29,14 +29,20 @@
 
 #include "status.h"
 
-// List of publishers to create
+// Publisher infrastructure
 sys_slist_t uros_pub_list = SYS_SFLIST_STATIC_INIT(&uros_pub_list);
 size_t uros_pub_list_cnt = 0;
+rcl_publisher_t* uros_publishers = NULL;
 
 size_t uros_add_publisher(uros_add_pub_node_t* node)
 {
   sys_slist_append(&uros_pub_list, &node->node);
   return uros_pub_list_cnt++;
+}
+
+rcl_ret_t uros_publish(size_t pub_index, const void* msg)
+{
+  return rcl_publish(&uros_publishers[pub_index], msg, NULL);
 }
 
 // Thread structures
@@ -63,7 +69,6 @@ void uros_thread(void* param1, void* param2, void* param3)
   (void)param3;
 
   // Start by allocating all required support structures
-  rcl_publisher_t* uros_publishers = NULL;
   if (uros_pub_list_cnt > 0)
   {
     uros_publishers = k_malloc(uros_pub_list_cnt * sizeof(rcl_publisher_t));
@@ -118,7 +123,6 @@ void uros_thread(void* param1, void* param2, void* param3)
       atomic_set(&status, STATUS_ERROR);
       return;
     }
-    // RCCHECK(rclc_publisher_init_default(&uros_publishers[cur_node_i], &node, cur_node->type, cur_node->topic_name));
     ++cur_node_i;
   }
 

@@ -12,6 +12,7 @@ typedef struct
 } uros_add_pub_node_t;
 
 size_t uros_add_publisher(uros_add_pub_node_t* node);
+rcl_ret_t uros_publish(size_t pub_index, const void* msg);
 
 int uros_init();
 int uros_start();
