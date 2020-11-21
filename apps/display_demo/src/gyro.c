@@ -8,8 +8,10 @@
 #include <zephyr.h>
 #include <drivers/sensor.h>
 #include <stdio.h>
+#include <sensor_msgs/msg/temperature.h>
 
 #include "display.h"
+#include "uros.h"
 
 // Do this if we have a real gyro
 #define GYRO_NODE DT_ALIAS(gyro)
@@ -21,13 +23,21 @@
 
 const struct device* gyro_dev;
 
+uros_add_pub_node_t uros_temp_pub_node;
+
 int gyro_init()
 {
+  // Get device binding
   gyro_dev = device_get_binding(GYRO_LABEL);
   if (gyro_dev == NULL)
   {
     return -ENODEV;
   }
+
+  // Create uros publisher
+  uros_temp_pub_node.type = ROSIDL_GET_MSG_TYPE_SUPPORT(sensor_msgs, msg, Temperature);
+  uros_temp_pub_node.topic_name = "l3gd20_temp";
+  uros_add_publisher(&uros_temp_pub_node);
   return 0;
 }
 
