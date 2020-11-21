@@ -11,6 +11,26 @@
 #include <errno.h>
 #include <init.h>
 
+int l3gd20_read_reg(const struct device* dev, uint8_t reg_addr, uint8_t* value)
+{
+  struct l3gd20_data* data = dev->data;
+  const struct l3gd20_config* cfg = dev->config;
+
+  uint8_t buffer_tx[2] = { reg_addr | L3GD20_SPI_READ_BIT, 0 };
+  const struct spi_buf tx_buf = { .buf = buffer_tx, .len = 2 };
+  const struct spi_buf_set tx = { .buffers = &tx_buf, .count = 1 };
+
+  const struct spi_buf rx_buf[2] = { { .buf = NULL, .len = 1 }, { .buf = value, .len = 1 } };
+  const struct spi_buf_set rx = { .buffers = rx_buf, .count = 2 };
+
+  if (spi_transceive(data->bus, &cfg->spi_conf, &tx, &rx) != 0)
+  {
+    return -EIO;
+  }
+
+  return 0;
+}
+
 int l3gd20_sample_fetch(const struct device* dev, enum sensor_channel chan)
 {
   return -ENOTSUP;
@@ -47,20 +67,11 @@ int l3gd20_init(const struct device* dev)
 
   // Read WHO_AM_I register to confirm we got the right device
   uint8_t reg_who_am_i;
-
-  uint8_t buffer_tx[2] = { L3GD20_SPI_READ_BIT | L3GD20_REG_WHOAMI, 0 };
-  const struct spi_buf tx_buf = { .buf = buffer_tx, .len = 2 };
-  const struct spi_buf_set tx = { .buffers = &tx_buf, .count = 1 };
-
-  const struct spi_buf rx_buf[2] = { { .buf = NULL, .len = 1 }, { .buf = &reg_who_am_i, .len = 1 } };
-  const struct spi_buf_set rx = { .buffers = rx_buf, .count = 2 };
-
-  if (spi_transceive(l3gd20->bus, &cfg->spi_conf, &tx, &rx) != 0)
+  if (l3gd20_read_reg(dev, L3GD20_REG_WHOAMI, &reg_who_am_i) != 0)
   {
     return -EIO;
   }
 
-  // Check that we are on the correct device
   if (reg_who_am_i != L3GD20_WHOAMI)
   {
     return -EINVAL;
