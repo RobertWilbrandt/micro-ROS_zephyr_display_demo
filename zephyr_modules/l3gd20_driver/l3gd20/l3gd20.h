@@ -14,8 +14,14 @@
 #define L3GD20_SPI_READ_BIT BIT(7)
 
 #define L3GD20_REG_WHOAMI 0x0F
+#define L3GD20_REG_CTRL_REG1 0x20
 
 #define L3GD20_WHOAMI 0xD4
+
+#define L3GD20_PD_BIT BIT(3)
+#define L3GD20_Z_EN_BIT BIT(2)
+#define L3GD20_Y_EN_BIT BIT(1)
+#define L3GD20_X_EN_BIT BIT(0)
 
 struct l3gd20_data
 {

@@ -31,6 +31,26 @@ int l3gd20_read_reg(const struct device* dev, uint8_t reg_addr, uint8_t* value)
   return 0;
 }
 
+int l3gd20_write_reg(const struct device* dev, uint8_t reg_addr, uint8_t value)
+{
+  struct l3gd20_data* data = dev->data;
+  const struct l3gd20_config* cfg = dev->config;
+
+  uint8_t buffer_tx[2] = { reg_addr & ~L3GD20_SPI_READ_BIT, value };
+  const struct spi_buf tx_buf = { .buf = buffer_tx, .len = 2 };
+  const struct spi_buf_set tx = { .buffers = &tx_buf, .count = 1 };
+
+  const struct spi_buf rx_buf = { .buf = NULL, .len = 1 };
+  const struct spi_buf_set rx = { .buffers = &rx_buf, .count = 1 };
+
+  if (spi_transceive(data->bus, &cfg->spi_conf, &tx, &rx) != 0)
+  {
+    return -EIO;
+  }
+
+  return 0;
+}
+
 int l3gd20_sample_fetch(const struct device* dev, enum sensor_channel chan)
 {
   return -ENOTSUP;
@@ -75,6 +95,12 @@ int l3gd20_init(const struct device* dev)
   if (reg_who_am_i != L3GD20_WHOAMI)
   {
     return -EINVAL;
+  }
+
+  // Set CTRL_REG_1
+  if (l3gd20_write_reg(dev, L3GD20_REG_CTRL_REG1, L3GD20_X_EN_BIT | L3GD20_Y_EN_BIT | L3GD20_Z_EN_BIT) != 0)
+  {
+    return -EIO;
   }
 
   return 0;
