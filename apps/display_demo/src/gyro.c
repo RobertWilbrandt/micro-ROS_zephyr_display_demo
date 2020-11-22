@@ -6,9 +6,7 @@
 #include "gyro.h"
 
 #include <zephyr.h>
-#include <drivers/sensor.h>
 #include <stdio.h>
-#include <sensor_msgs/msg/temperature.h>
 
 #include "display.h"
 #include "uros.h"
@@ -17,6 +15,10 @@
 // Do this if we have a real gyro
 #define GYRO_NODE DT_ALIAS(gyro)
 #if DT_NODE_HAS_STATUS(GYRO_NODE, okay)
+
+#include <time.h>
+#include <sensor_msgs/msg/temperature.h>
+#include <drivers/sensor.h>
 
 #define GYRO_LABEL DT_LABEL(GYRO_NODE)
 #define GYRO_LABEL_FORMAT "Using onboard sensor '%s'"
@@ -81,6 +83,7 @@ void gyro_thread(void* param1, void* param2, void* param3)
 
   while (true)
   {
+    // Read sensor values
     struct sensor_value temp;
     if (sensor_sample_fetch(gyro_dev) != 0)
     {
@@ -95,6 +98,12 @@ void gyro_thread(void* param1, void* param2, void* param3)
     };
 
     temp_msg.temperature = temp.val1 + temp.val2 / 1000000.0;
+
+    // Add current time to message
+    struct timespec ts;
+    clock_gettime(CLOCK_REALTIME, &ts);
+    temp_msg.header.stamp.sec = ts.tv_sec;
+    temp_msg.header.stamp.nanosec = ts.tv_nsec;
 
     if (uros_publish(uros_temp_pub_idx, &temp_msg) != RCL_RET_OK)
     {
