@@ -51,14 +51,48 @@ int l3gd20_write_reg(const struct device* dev, uint8_t reg_addr, uint8_t value)
   return 0;
 }
 
+void l3gd20_convert_temp(uint8_t sample_raw, struct sensor_value* val)
+{
+  // Convert from 2s complement
+  int8_t sample_signed = sample_raw;
+  if ((sample_raw & BIT(7)) != 0)
+  {
+    sample_signed = -(~sample_raw + 1);
+  }
+
+  val->val1 = sample_signed;
+  val->val2 = 0;
+}
+
 int l3gd20_sample_fetch(const struct device* dev, enum sensor_channel chan)
 {
-  return -ENOTSUP;
+  struct l3gd20_data* data = dev->data;
+
+  if (chan == SENSOR_CHAN_DIE_TEMP || chan == SENSOR_CHAN_ALL)
+  {
+    int status = l3gd20_read_reg(dev, L3GD20_REG_OUT_TEMP, &data->temp_sample);
+
+    if (status < 0)
+    {
+      return status;
+    }
+  }
+
+  return 0;
 }
 
 static int l3gd20_channel_get(const struct device* dev, enum sensor_channel chan, struct sensor_value* val)
 {
-  return -ENOTSUP;
+  struct l3gd20_data* data = dev->data;
+  switch (chan)
+  {
+    case SENSOR_CHAN_DIE_TEMP:
+      l3gd20_convert_temp(data->temp_sample, val);
+      return 0;
+
+    default:
+      return -ENOTSUP;
+  }
 }
 
 static const struct sensor_driver_api l3gd20_driver_api = {
@@ -98,10 +132,13 @@ int l3gd20_init(const struct device* dev)
   }
 
   // Set CTRL_REG_1
-  if (l3gd20_write_reg(dev, L3GD20_REG_CTRL_REG1, L3GD20_X_EN_BIT | L3GD20_Y_EN_BIT | L3GD20_Z_EN_BIT) != 0)
+  const uint8_t ctrl1_word = L3GD20_X_EN_BIT | L3GD20_Y_EN_BIT | L3GD20_Z_EN_BIT | L3GD20_PD_BIT;
+  if (l3gd20_write_reg(dev, L3GD20_REG_CTRL_REG1, ctrl1_word) != 0)
   {
     return -EIO;
   }
+
+  l3gd20->temp_sample = 0;
 
   return 0;
 }

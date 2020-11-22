@@ -15,6 +15,7 @@
 
 #define L3GD20_REG_WHOAMI 0x0F
 #define L3GD20_REG_CTRL_REG1 0x20
+#define L3GD20_REG_OUT_TEMP 0x26
 
 #define L3GD20_WHOAMI 0xD4
 
@@ -28,7 +29,7 @@ struct l3gd20_data
   const struct device* bus;
   struct spi_cs_control cs_ctrl;
 
-  int16_t x_sample;
+  uint8_t temp_sample;
 };
 
 struct l3gd20_config

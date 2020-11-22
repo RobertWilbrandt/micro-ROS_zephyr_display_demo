@@ -81,6 +81,21 @@ void gyro_thread(void* param1, void* param2, void* param3)
 
   while (true)
   {
+    struct sensor_value temp;
+    if (sensor_sample_fetch(gyro_dev) != 0)
+    {
+      atomic_set(&status, STATUS_ERROR);
+      return;
+    }
+
+    if (sensor_channel_get(gyro_dev, SENSOR_CHAN_DIE_TEMP, &temp) != 0)
+    {
+      atomic_set(&status, STATUS_ERROR);
+      return;
+    };
+
+    temp_msg.temperature = temp.val1 + temp.val2 / 1000000.0;
+
     if (uros_publish(uros_temp_pub_idx, &temp_msg) != RCL_RET_OK)
     {
       atomic_set(&status, STATUS_ERROR);
