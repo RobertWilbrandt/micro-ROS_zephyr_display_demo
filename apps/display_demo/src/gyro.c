@@ -18,23 +18,28 @@
 
 #include <time.h>
 #include <sensor_msgs/msg/temperature.h>
+#include <sensor_msgs/msg/imu.h>
 #include <drivers/sensor.h>
 
+// HW handles & information
 #define GYRO_LABEL DT_LABEL(GYRO_NODE)
 #define GYRO_LABEL_FORMAT "Using onboard sensor '%s'"
 #define GYRO_LABEL_FULL_LEN sizeof(GYRO_LABEL_FORMAT) - 1 + sizeof(GYRO_LABEL)
-
 const struct device* gyro_dev;
 
+// Thread handles
 #define GYRO_THREAD_STACK_SIZE 2048
 #define GYRO_THREAD_PRIORITY 3
-
 void gyro_thread(void* param1, void* param2, void* param3);
 K_THREAD_STACK_DEFINE(gyro_thread_stack_area, GYRO_THREAD_STACK_SIZE);
 struct k_thread gyro_thread_stack_data;
 
+// UROS handles
 uros_add_pub_node_t uros_temp_pub_node;
 size_t uros_temp_pub_idx;
+
+uros_add_pub_node_t uros_imu_pub_node;
+size_t uros_imu_pub_idx;
 
 int gyro_init()
 {
@@ -49,6 +54,10 @@ int gyro_init()
   uros_temp_pub_node.type = ROSIDL_GET_MSG_TYPE_SUPPORT(sensor_msgs, msg, Temperature);
   uros_temp_pub_node.topic_name = "l3gd20_temp";
   uros_temp_pub_idx = uros_add_publisher(&uros_temp_pub_node);
+
+  uros_imu_pub_node.type = ROSIDL_GET_MSG_TYPE_SUPPORT(sensor_msgs, msg, Imu);
+  uros_imu_pub_node.topic_name = "l3gd20_gyro";
+  uros_imu_pub_idx = uros_add_publisher(&uros_imu_pub_node);
   return 0;
 }
 
