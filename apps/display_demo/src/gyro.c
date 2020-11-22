@@ -73,8 +73,6 @@ void gyro_thread(void* param1, void* param2, void* param3)
   sensor_msgs__msg__Temperature temp_msg = { 0 };
   temp_msg.header.frame_id.data = "test_frame";
   temp_msg.header.frame_id.size = strlen(temp_msg.header.frame_id.data);
-  temp_msg.variance = 0;
-  temp_msg.temperature = 42.0;
 
   while (atomic_get(&status) != STATUS_RUNNING)
   {
@@ -97,7 +95,7 @@ void gyro_thread(void* param1, void* param2, void* param3)
       return;
     };
 
-    temp_msg.temperature = temp.val1 + temp.val2 / 1000000.0;
+    temp_msg.temperature = sensor_value_to_double(&temp);
 
     // Add current time to message
     struct timespec ts;
