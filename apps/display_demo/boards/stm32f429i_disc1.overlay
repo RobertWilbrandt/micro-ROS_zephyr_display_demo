@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
-#include <dt-bindings/display/ili9340.h>
+#include <dt-bindings/display/ili9xxx.h>
 
 / {
   aliases {
@@ -19,7 +19,7 @@
               &gpioc 1 GPIO_ACTIVE_LOW>;
 
   ili9340@0 {
-    pixel-format = <ILI9340_PIXEL_FORMAT_RGB888>;
+    pixel-format = <ILI9XXX_PIXEL_FORMAT_RGB888>;
     rotation = <90>;
   };
 
