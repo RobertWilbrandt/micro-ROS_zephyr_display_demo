@@ -83,6 +83,27 @@ void gyro_thread(void* param1, void* param2, void* param3)
   temp_msg.header.frame_id.data = "";
   temp_msg.header.frame_id.size = strlen(temp_msg.header.frame_id.data);
 
+  sensor_msgs__msg__Imu imu_msg = { 0 };
+  imu_msg.header.frame_id.data = "";
+  imu_msg.header.frame_id.size = strlen(imu_msg.header.frame_id.data);
+
+  // Indicate that we cannot measure orientation and linear acceleration
+  imu_msg.orientation.x = 0.0;
+  imu_msg.orientation.y = 0.0;
+  imu_msg.orientation.z = 0.0;
+  imu_msg.orientation.w = 0.0;
+  imu_msg.orientation_covariance[0] = -1.0;
+  memset(&imu_msg.orientation_covariance[1], 0, 8);
+
+  imu_msg.linear_acceleration.x = 0.0;
+  imu_msg.linear_acceleration.y = 0.0;
+  imu_msg.linear_acceleration.z = 0.0;
+  imu_msg.linear_acceleration_covariance[0] = -1.0;
+  memset(&imu_msg.linear_acceleration_covariance[1], 0, 8);
+
+  // Indicate that we don't know the covariance of our angular velocity
+  memset(imu_msg.angular_velocity_covariance, 0, 9);
+
   while (atomic_get(&status) != STATUS_RUNNING)
   {
     k_sleep(K_MSEC(100));
@@ -113,6 +134,14 @@ void gyro_thread(void* param1, void* param2, void* param3)
     temp_msg.header.stamp.nanosec = ts.tv_nsec;
 
     if (uros_publish(uros_temp_pub_idx, &temp_msg) != RCL_RET_OK)
+    {
+      atomic_set(&status, STATUS_ERROR);
+      return;
+    }
+
+    imu_msg.header.stamp.sec = ts.tv_sec;
+    imu_msg.header.stamp.nanosec = ts.tv_nsec;
+    if (uros_publish(uros_imu_pub_idx, &imu_msg) != RCL_RET_OK)
     {
       atomic_set(&status, STATUS_ERROR);
       return;
