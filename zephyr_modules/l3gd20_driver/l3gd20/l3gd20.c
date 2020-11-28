@@ -70,7 +70,7 @@ int l3gd20_sample_fetch(const struct device* dev, enum sensor_channel chan)
 
   if (chan == SENSOR_CHAN_DIE_TEMP || chan == SENSOR_CHAN_ALL)
   {
-    int status = l3gd20_read_reg(dev, L3GD20_REG_OUT_TEMP, &data->temp_sample);
+    int status = l3gd20_read_reg(dev, L3GD20_REG_OUT_TEMP, &data->last_sample.temp);
 
     if (status < 0)
     {
@@ -87,7 +87,7 @@ static int l3gd20_channel_get(const struct device* dev, enum sensor_channel chan
   switch (chan)
   {
     case SENSOR_CHAN_DIE_TEMP:
-      l3gd20_convert_temp(data->temp_sample, val);
+      l3gd20_convert_temp(data->last_sample.temp, val);
       return 0;
 
     default:
@@ -138,7 +138,7 @@ int l3gd20_init(const struct device* dev)
     return -EIO;
   }
 
-  l3gd20->temp_sample = 0;
+  l3gd20->last_sample.temp = 0;
 
   return 0;
 }

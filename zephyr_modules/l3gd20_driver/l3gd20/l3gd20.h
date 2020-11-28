@@ -24,12 +24,17 @@
 #define L3GD20_Y_EN_BIT BIT(1)
 #define L3GD20_X_EN_BIT BIT(0)
 
+struct l3gd20_sample
+{
+  uint8_t temp;
+};
+
 struct l3gd20_data
 {
   const struct device* bus;
   struct spi_cs_control cs_ctrl;
 
-  uint8_t temp_sample;
+  struct l3gd20_sample last_sample;
 };
 
 struct l3gd20_config
