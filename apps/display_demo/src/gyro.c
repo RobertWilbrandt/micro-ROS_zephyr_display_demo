@@ -80,7 +80,7 @@ void gyro_thread(void* param1, void* param2, void* param3)
   (void)param3;
 
   sensor_msgs__msg__Temperature temp_msg = { 0 };
-  temp_msg.header.frame_id.data = "test_frame";
+  temp_msg.header.frame_id.data = "";
   temp_msg.header.frame_id.size = strlen(temp_msg.header.frame_id.data);
 
   while (atomic_get(&status) != STATUS_RUNNING)
