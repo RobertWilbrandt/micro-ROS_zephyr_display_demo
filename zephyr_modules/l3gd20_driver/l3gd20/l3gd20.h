@@ -35,6 +35,9 @@ struct l3gd20_data
   struct spi_cs_control cs_ctrl;
 
   struct l3gd20_sample last_sample;
+
+  // Temperature sensor data
+  uint8_t temp_offset;
 };
 
 struct l3gd20_config

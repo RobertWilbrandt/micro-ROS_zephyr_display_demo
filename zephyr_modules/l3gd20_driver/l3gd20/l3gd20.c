@@ -51,13 +51,16 @@ int l3gd20_write_reg(const struct device* dev, uint8_t reg_addr, uint8_t value)
   return 0;
 }
 
-void l3gd20_convert_temp(uint8_t sample_raw, struct sensor_value* val)
+void l3gd20_convert_temp(const struct l3gd20_data* l3gd20_data, uint8_t sample_raw, struct sensor_value* val)
 {
+  // Convert to actual temperature using offset
+  uint8_t abs_temp = l3gd20_data->temp_offset + (l3gd20_data->temp_offset - sample_raw);
+
   // Convert from 2s complement
-  int8_t sample_signed = sample_raw;
+  int8_t sample_signed = abs_temp;
   if ((sample_raw & BIT(7)) != 0)
   {
-    sample_signed = -(~sample_raw + 1);
+    sample_signed = -(~sample_signed + 1);
   }
 
   val->val1 = sample_signed;
@@ -87,7 +90,7 @@ static int l3gd20_channel_get(const struct device* dev, enum sensor_channel chan
   switch (chan)
   {
     case SENSOR_CHAN_DIE_TEMP:
-      l3gd20_convert_temp(data->last_sample.temp, val);
+      l3gd20_convert_temp(data, data->last_sample.temp, val);
       return 0;
 
     default:
@@ -138,6 +141,13 @@ int l3gd20_init(const struct device* dev)
     return -EIO;
   }
 
+  // Read temperature offset
+  if (l3gd20_read_reg(dev, L3GD20_REG_OUT_TEMP, &l3gd20->temp_offset) != 0)
+  {
+    return -EIO;
+  }
+
+  // Initialize last sample
   l3gd20->last_sample.temp = 0;
 
   return 0;
