@@ -11,12 +11,20 @@
 #include <errno.h>
 #include <init.h>
 
-#define L3GD20_RET_IF_STATUS_ERR(func)                                                                                 \
+#define L3GD20_RET_STATUS_IF_ERR(func)                                                                                 \
   {                                                                                                                    \
     int status = func;                                                                                                 \
     if (status != 0)                                                                                                   \
     {                                                                                                                  \
       return status;                                                                                                   \
+    }                                                                                                                  \
+  }
+
+#define L3GD20_RET_VAL_IF_ERR(func, val)                                                                               \
+  {                                                                                                                    \
+    if (func != 0)                                                                                                     \
+    {                                                                                                                  \
+      return val;                                                                                                      \
     }                                                                                                                  \
   }
 
@@ -32,10 +40,7 @@ int l3gd20_read_reg(const struct device* dev, uint8_t reg_addr, uint8_t* value)
   const struct spi_buf rx_buf[2] = { { .buf = NULL, .len = 1 }, { .buf = value, .len = 1 } };
   const struct spi_buf_set rx = { .buffers = rx_buf, .count = 2 };
 
-  if (spi_transceive(data->bus, &cfg->spi_conf, &tx, &rx) != 0)
-  {
-    return -EIO;
-  }
+  L3GD20_RET_VAL_IF_ERR(spi_transceive(data->bus, &cfg->spi_conf, &tx, &rx), -EIO);
 
   return 0;
 }
@@ -52,10 +57,7 @@ int l3gd20_write_reg(const struct device* dev, uint8_t reg_addr, uint8_t value)
   const struct spi_buf rx_buf = { .buf = NULL, .len = 1 };
   const struct spi_buf_set rx = { .buffers = &rx_buf, .count = 1 };
 
-  if (spi_transceive(data->bus, &cfg->spi_conf, &tx, &rx) != 0)
-  {
-    return -EIO;
-  }
+  L3GD20_RET_VAL_IF_ERR(spi_transceive(data->bus, &cfg->spi_conf, &tx, &rx), -EIO);
 
   return 0;
 }
@@ -82,7 +84,7 @@ int l3gd20_sample_fetch(const struct device* dev, enum sensor_channel chan)
 
   if (chan == SENSOR_CHAN_DIE_TEMP || chan == SENSOR_CHAN_ALL)
   {
-    L3GD20_RET_IF_STATUS_ERR(l3gd20_read_reg(dev, L3GD20_REG_OUT_TEMP, &data->last_sample.temp));
+    L3GD20_RET_STATUS_IF_ERR(l3gd20_read_reg(dev, L3GD20_REG_OUT_TEMP, &data->last_sample.temp));
   }
 
   return 0;
@@ -128,10 +130,7 @@ int l3gd20_init(const struct device* dev)
 
   // Read WHO_AM_I register to confirm we got the right device
   uint8_t reg_who_am_i;
-  if (l3gd20_read_reg(dev, L3GD20_REG_WHOAMI, &reg_who_am_i) != 0)
-  {
-    return -EIO;
-  }
+  L3GD20_RET_VAL_IF_ERR(l3gd20_read_reg(dev, L3GD20_REG_WHOAMI, &reg_who_am_i), -EIO);
 
   if (reg_who_am_i != L3GD20_WHOAMI)
   {
@@ -140,16 +139,10 @@ int l3gd20_init(const struct device* dev)
 
   // Set CTRL_REG_1
   const uint8_t ctrl1_word = L3GD20_X_EN_BIT | L3GD20_Y_EN_BIT | L3GD20_Z_EN_BIT | L3GD20_PD_BIT;
-  if (l3gd20_write_reg(dev, L3GD20_REG_CTRL_REG1, ctrl1_word) != 0)
-  {
-    return -EIO;
-  }
+  L3GD20_RET_VAL_IF_ERR(l3gd20_write_reg(dev, L3GD20_REG_CTRL_REG1, ctrl1_word), -EIO);
 
   // Read temperature offset
-  if (l3gd20_read_reg(dev, L3GD20_REG_OUT_TEMP, &l3gd20->temp_offset) != 0)
-  {
-    return -EIO;
-  }
+  L3GD20_RET_VAL_IF_ERR(l3gd20_read_reg(dev, L3GD20_REG_OUT_TEMP, &l3gd20->temp_offset), -EIO);
 
   // Initialize last sample
   l3gd20->last_sample.temp = 0;
