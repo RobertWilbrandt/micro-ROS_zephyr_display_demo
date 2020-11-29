@@ -11,6 +11,15 @@
 #include <errno.h>
 #include <init.h>
 
+#define L3GD20_RET_IF_STATUS_ERR(func)                                                                                 \
+  {                                                                                                                    \
+    int status = func;                                                                                                 \
+    if (status != 0)                                                                                                   \
+    {                                                                                                                  \
+      return status;                                                                                                   \
+    }                                                                                                                  \
+  }
+
 int l3gd20_read_reg(const struct device* dev, uint8_t reg_addr, uint8_t* value)
 {
   struct l3gd20_data* data = dev->data;
@@ -73,12 +82,7 @@ int l3gd20_sample_fetch(const struct device* dev, enum sensor_channel chan)
 
   if (chan == SENSOR_CHAN_DIE_TEMP || chan == SENSOR_CHAN_ALL)
   {
-    int status = l3gd20_read_reg(dev, L3GD20_REG_OUT_TEMP, &data->last_sample.temp);
-
-    if (status < 0)
-    {
-      return status;
-    }
+    L3GD20_RET_IF_STATUS_ERR(l3gd20_read_reg(dev, L3GD20_REG_OUT_TEMP, &data->last_sample.temp));
   }
 
   return 0;
