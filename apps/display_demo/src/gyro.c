@@ -35,10 +35,10 @@ K_THREAD_STACK_DEFINE(gyro_thread_stack_area, GYRO_THREAD_STACK_SIZE);
 struct k_thread gyro_thread_stack_data;
 
 // UROS handles
-uros_add_pub_node_t uros_temp_pub_node;
+struct uros_add_pub_node uros_temp_pub_node;
 size_t uros_temp_pub_idx;
 
-uros_add_pub_node_t uros_imu_pub_node;
+struct uros_add_pub_node uros_imu_pub_node;
 size_t uros_imu_pub_idx;
 
 int gyro_init()

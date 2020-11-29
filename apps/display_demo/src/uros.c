@@ -34,7 +34,7 @@ sys_slist_t uros_pub_list = SYS_SFLIST_STATIC_INIT(&uros_pub_list);
 size_t uros_pub_list_cnt = 0;
 rcl_publisher_t* uros_publishers = NULL;
 
-size_t uros_add_publisher(uros_add_pub_node_t* node)
+size_t uros_add_publisher(struct uros_add_pub_node* node)
 {
   sys_slist_append(&uros_pub_list, &node->node);
   return uros_pub_list_cnt++;
@@ -113,7 +113,7 @@ void uros_thread(void* param1, void* param2, void* param3)
 
   // Add publishers
   size_t cur_node_i = 0;
-  for (uros_add_pub_node_t* cur_node = SYS_SLIST_PEEK_HEAD_CONTAINER(&uros_pub_list, cur_node, node); cur_node != NULL;
+  for (struct uros_add_pub_node* cur_node = SYS_SLIST_PEEK_HEAD_CONTAINER(&uros_pub_list, cur_node, node); cur_node != NULL;
        cur_node = SYS_SLIST_PEEK_NEXT_CONTAINER(cur_node, node))
   {
     rcl_ret_t pub_init_ret =
