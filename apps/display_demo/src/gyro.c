@@ -35,11 +35,8 @@ K_THREAD_STACK_DEFINE(gyro_thread_stack_area, GYRO_THREAD_STACK_SIZE);
 struct k_thread gyro_thread_stack_data;
 
 // UROS handles
-struct uros_add_pub_node uros_temp_pub_node;
-size_t uros_temp_pub_idx;
-
-struct uros_add_pub_node uros_imu_pub_node;
-size_t uros_imu_pub_idx;
+struct uros_pub_handle uros_temp_pub;
+struct uros_pub_handle uros_imu_pub;
 
 int gyro_init()
 {
@@ -51,13 +48,13 @@ int gyro_init()
   }
 
   // Create uros publisher
-  uros_temp_pub_node.type = ROSIDL_GET_MSG_TYPE_SUPPORT(sensor_msgs, msg, Temperature);
-  uros_temp_pub_node.topic_name = "l3gd20_temp";
-  uros_temp_pub_idx = uros_add_publisher(&uros_temp_pub_node);
+  uros_temp_pub.type = ROSIDL_GET_MSG_TYPE_SUPPORT(sensor_msgs, msg, Temperature);
+  uros_temp_pub.topic_name = "l3gd20_temp";
+  uros_add_pub(&uros_temp_pub);
 
-  uros_imu_pub_node.type = ROSIDL_GET_MSG_TYPE_SUPPORT(sensor_msgs, msg, Imu);
-  uros_imu_pub_node.topic_name = "l3gd20_gyro";
-  uros_imu_pub_idx = uros_add_publisher(&uros_imu_pub_node);
+  uros_imu_pub.type = ROSIDL_GET_MSG_TYPE_SUPPORT(sensor_msgs, msg, Imu);
+  uros_imu_pub.topic_name = "l3gd20_gyro";
+  uros_add_pub(&uros_imu_pub);
   return 0;
 }
 
@@ -133,7 +130,7 @@ void gyro_thread(void* param1, void* param2, void* param3)
     temp_msg.header.stamp.sec = ts.tv_sec;
     temp_msg.header.stamp.nanosec = ts.tv_nsec;
 
-    if (uros_publish(uros_temp_pub_idx, &temp_msg) != RCL_RET_OK)
+    if (uros_pub(&uros_temp_pub, &temp_msg) != RCL_RET_OK)
     {
       atomic_set(&status, STATUS_ERROR);
       return;
@@ -141,7 +138,7 @@ void gyro_thread(void* param1, void* param2, void* param3)
 
     imu_msg.header.stamp.sec = ts.tv_sec;
     imu_msg.header.stamp.nanosec = ts.tv_nsec;
-    if (uros_publish(uros_imu_pub_idx, &imu_msg) != RCL_RET_OK)
+    if (uros_pub(&uros_imu_pub, &imu_msg) != RCL_RET_OK)
     {
       atomic_set(&status, STATUS_ERROR);
       return;

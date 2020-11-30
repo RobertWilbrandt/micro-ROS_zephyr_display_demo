@@ -34,15 +34,15 @@ sys_slist_t uros_pub_list = SYS_SFLIST_STATIC_INIT(&uros_pub_list);
 size_t uros_pub_list_cnt = 0;
 rcl_publisher_t* uros_publishers = NULL;
 
-size_t uros_add_publisher(struct uros_add_pub_node* node)
+void uros_add_pub(struct uros_pub_handle* node)
 {
   sys_slist_append(&uros_pub_list, &node->node);
-  return uros_pub_list_cnt++;
+  node->pub_idx = uros_pub_list_cnt++;
 }
 
-rcl_ret_t uros_publish(size_t pub_index, const void* msg)
+rcl_ret_t uros_pub(struct uros_pub_handle* handle, const void* msg)
 {
-  return rcl_publish(&uros_publishers[pub_index], msg, NULL);
+  return rcl_publish(&uros_publishers[handle->pub_idx], msg, NULL);
 }
 
 // Thread structures
@@ -113,8 +113,8 @@ void uros_thread(void* param1, void* param2, void* param3)
 
   // Add publishers
   size_t cur_node_i = 0;
-  for (struct uros_add_pub_node* cur_node = SYS_SLIST_PEEK_HEAD_CONTAINER(&uros_pub_list, cur_node, node); cur_node != NULL;
-       cur_node = SYS_SLIST_PEEK_NEXT_CONTAINER(cur_node, node))
+  for (struct uros_pub_handle* cur_node = SYS_SLIST_PEEK_HEAD_CONTAINER(&uros_pub_list, cur_node, node);
+       cur_node != NULL; cur_node = SYS_SLIST_PEEK_NEXT_CONTAINER(cur_node, node))
   {
     rcl_ret_t pub_init_ret =
         rclc_publisher_init_default(&uros_publishers[cur_node_i], &node, cur_node->type, cur_node->topic_name);

@@ -4,15 +4,17 @@
 #include <rclc/rclc.h>
 #include <zephyr.h>
 
-struct uros_add_pub_node
+struct uros_pub_handle
 {
   sys_snode_t node;
   const rosidl_message_type_support_t* type;
   const char* topic_name;
+
+  size_t pub_idx;
 };
 
-size_t uros_add_publisher(struct uros_add_pub_node* node);
-rcl_ret_t uros_publish(size_t pub_index, const void* msg);
+void uros_add_pub(struct uros_pub_handle* handle);
+rcl_ret_t uros_pub(struct uros_pub_handle* handle, const void* msg);
 
 int uros_init();
 int uros_start();
