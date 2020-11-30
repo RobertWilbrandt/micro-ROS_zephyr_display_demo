@@ -7,6 +7,7 @@
 
 #include <rcl/rcl.h>
 #include <rclc/rclc.h>
+#include <rclc/executor.h>
 #include <zephyr.h>
 
 #define UROS_THREAD_STACK_SIZE 16384
@@ -34,15 +35,26 @@ sys_slist_t uros_pub_list = SYS_SFLIST_STATIC_INIT(&uros_pub_list);
 size_t uros_pub_list_cnt = 0;
 rcl_publisher_t* uros_publishers = NULL;
 
-void uros_add_pub(struct uros_pub_handle* node)
+void uros_add_pub(struct uros_pub_handle* handle)
 {
-  sys_slist_append(&uros_pub_list, &node->node);
-  node->pub_idx = uros_pub_list_cnt++;
+  sys_slist_append(&uros_pub_list, &handle->node);
+  handle->pub_idx = uros_pub_list_cnt++;
 }
 
 rcl_ret_t uros_pub(struct uros_pub_handle* handle, const void* msg)
 {
   return rcl_publish(&uros_publishers[handle->pub_idx], msg, NULL);
+}
+
+// Timer infrastructure
+sys_slist_t uros_timer_list = SYS_SFLIST_STATIC_INIT(&uros_timer_list);
+size_t uros_timer_list_cnt = 0;
+rcl_timer_t* uros_timers = NULL;
+
+void uros_add_timer(struct uros_timer_handle* handle)
+{
+  sys_slist_append(&uros_timer_list, &handle->node);
+  handle->timer_idx = uros_timer_list_cnt++;
 }
 
 // Thread structures
@@ -78,6 +90,17 @@ void uros_thread(void* param1, void* param2, void* param3)
       return;
     }
     memset(uros_publishers, 0, uros_pub_list_cnt * sizeof(rcl_publisher_t));
+  }
+
+  if (uros_timer_list_cnt > 0)
+  {
+    uros_timers = k_malloc(uros_timer_list_cnt * sizeof(rcl_timer_t));
+    if (uros_timers == NULL)
+    {
+      atomic_set(&status, STATUS_ERROR);
+      return;
+    }
+    memset(uros_timers, 0, uros_timer_list_cnt * sizeof(rcl_timer_t));
   }
 
   // Start uros initialization
@@ -123,6 +146,7 @@ void uros_thread(void* param1, void* param2, void* param3)
       atomic_set(&status, STATUS_ERROR);
       return;
     }
+
     ++cur_node_i;
   }
 
@@ -132,12 +156,40 @@ void uros_thread(void* param1, void* param2, void* param3)
     return;
   }
 
-  atomic_set(&status, STATUS_RUNNING);
-  while (1)
+  // Add timers
+  size_t cur_timer_i = 0;
+  for (struct uros_timer_handle* cur_timer = SYS_SLIST_PEEK_HEAD_CONTAINER(&uros_timer_list, cur_timer, node);
+       cur_timer != NULL; cur_timer = SYS_SLIST_PEEK_NEXT_CONTAINER(cur_timer, node))
   {
-    k_sleep(K_MSEC(1000));
+    rcl_ret_t timer_init_ret = rclc_timer_init_default(&uros_timers[cur_timer_i], &support,
+                                                       RCL_MS_TO_NS(cur_timer->timeout_ms), cur_timer->cb);
+    if (timer_init_ret != RCL_RET_OK)
+    {
+      atomic_set(&status, STATUS_ERROR);
+      return;
+    }
+
+    ++cur_timer_i;
   }
 
+  if (cur_timer_i != uros_timer_list_cnt)
+  {
+    atomic_set(&status, STATUS_ERROR);
+    return;
+  }
+
+  // Create executor
+  rclc_executor_t executor;
+  rclc_executor_init(&executor, &support.context, uros_timer_list_cnt, &allocator);
+  for (size_t i = 0; i < uros_timer_list_cnt; ++i)
+  {
+    RCCHECK(rclc_executor_add_timer(&executor, &uros_timers[i]));
+  }
+
+  atomic_set(&status, STATUS_RUNNING);
+  rclc_executor_spin(&executor);
+
+  RCCHECK(rclc_executor_fini(&executor));
   RCCHECK(rcl_node_fini(&node));
   RCCHECK(rclc_support_fini(&support));
 }
