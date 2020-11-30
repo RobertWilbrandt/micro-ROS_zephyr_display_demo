@@ -27,16 +27,15 @@
 #define GYRO_LABEL_FULL_LEN sizeof(GYRO_LABEL_FORMAT) - 1 + sizeof(GYRO_LABEL)
 const struct device* gyro_dev;
 
-// Thread handles
-#define GYRO_THREAD_STACK_SIZE 2048
-#define GYRO_THREAD_PRIORITY 3
-void gyro_thread(void* param1, void* param2, void* param3);
-K_THREAD_STACK_DEFINE(gyro_thread_stack_area, GYRO_THREAD_STACK_SIZE);
-struct k_thread gyro_thread_stack_data;
-
 // UROS handles
 struct uros_pub_handle uros_temp_pub;
 struct uros_pub_handle uros_imu_pub;
+
+struct uros_timer_handle uros_temp_timer;
+struct uros_timer_handle uros_imu_timer;
+
+void gyro_temp_timer_cb(rcl_timer_t* timer, int64_t last_call_time);
+void gyro_imu_timer_cb(rcl_timer_t* timer, int64_t last_call_time);
 
 int gyro_init()
 {
@@ -55,6 +54,15 @@ int gyro_init()
   uros_imu_pub.type = ROSIDL_GET_MSG_TYPE_SUPPORT(sensor_msgs, msg, Imu);
   uros_imu_pub.topic_name = "l3gd20_gyro";
   uros_add_pub(&uros_imu_pub);
+
+  uros_temp_timer.timeout_ms = 1000;
+  uros_temp_timer.cb = &gyro_temp_timer_cb;
+  uros_add_timer(&uros_temp_timer);
+
+  uros_imu_timer.timeout_ms = 100;
+  uros_imu_timer.cb = &gyro_imu_timer_cb;
+  uros_add_timer(&uros_imu_timer);
+
   return 0;
 }
 
@@ -64,22 +72,45 @@ int gyro_start()
   sprintf(gyro_label_text, "Using onboard sensor '%s'", GYRO_LABEL);
   display_set_label_gyro(gyro_label_text);
 
-  k_thread_create(&gyro_thread_stack_data, gyro_thread_stack_area, K_THREAD_STACK_SIZEOF(gyro_thread_stack_area),
-                  &gyro_thread, NULL, NULL, NULL, GYRO_THREAD_PRIORITY, 0, K_NO_WAIT);
-
   return 0;
 }
 
-void gyro_thread(void* param1, void* param2, void* param3)
+void gyro_temp_timer_cb(rcl_timer_t* timer, int64_t last_call_time)
 {
-  (void)param1;
-  (void)param2;
-  (void)param3;
-
   sensor_msgs__msg__Temperature temp_msg = { 0 };
   temp_msg.header.frame_id.data = "";
   temp_msg.header.frame_id.size = strlen(temp_msg.header.frame_id.data);
 
+  // Read sensor values
+  struct sensor_value temp;
+  if (sensor_sample_fetch(gyro_dev) != 0)
+  {
+    atomic_set(&status, STATUS_ERROR);
+    return;
+  }
+
+  if (sensor_channel_get(gyro_dev, SENSOR_CHAN_DIE_TEMP, &temp) != 0)
+  {
+    atomic_set(&status, STATUS_ERROR);
+    return;
+  };
+
+  temp_msg.temperature = sensor_value_to_double(&temp);
+
+  struct timespec ts;
+  clock_gettime(CLOCK_REALTIME, &ts);
+  temp_msg.header.stamp.sec = ts.tv_sec;
+  temp_msg.header.stamp.nanosec = ts.tv_nsec;
+
+  if (uros_pub(&uros_temp_pub, &temp_msg) != RCL_RET_OK)
+  {
+    atomic_set(&status, STATUS_ERROR);
+    return;
+  }
+}
+
+void gyro_imu_timer_cb(rcl_timer_t* timer, int64_t last_call_time)
+{
   sensor_msgs__msg__Imu imu_msg = { 0 };
   imu_msg.header.frame_id.data = "";
   imu_msg.header.frame_id.size = strlen(imu_msg.header.frame_id.data);
@@ -101,50 +132,15 @@ void gyro_thread(void* param1, void* param2, void* param3)
   // Indicate that we don't know the covariance of our angular velocity
   memset(imu_msg.angular_velocity_covariance, 0, 9);
 
-  while (atomic_get(&status) != STATUS_RUNNING)
+  struct timespec ts;
+  clock_gettime(CLOCK_REALTIME, &ts);
+  imu_msg.header.stamp.sec = ts.tv_sec;
+  imu_msg.header.stamp.nanosec = ts.tv_nsec;
+
+  if (uros_pub(&uros_imu_pub, &imu_msg) != RCL_RET_OK)
   {
-    k_sleep(K_MSEC(100));
-  }
-
-  while (true)
-  {
-    // Read sensor values
-    struct sensor_value temp;
-    if (sensor_sample_fetch(gyro_dev) != 0)
-    {
-      atomic_set(&status, STATUS_ERROR);
-      return;
-    }
-
-    if (sensor_channel_get(gyro_dev, SENSOR_CHAN_DIE_TEMP, &temp) != 0)
-    {
-      atomic_set(&status, STATUS_ERROR);
-      return;
-    };
-
-    temp_msg.temperature = sensor_value_to_double(&temp);
-
-    // Add current time to message
-    struct timespec ts;
-    clock_gettime(CLOCK_REALTIME, &ts);
-    temp_msg.header.stamp.sec = ts.tv_sec;
-    temp_msg.header.stamp.nanosec = ts.tv_nsec;
-
-    if (uros_pub(&uros_temp_pub, &temp_msg) != RCL_RET_OK)
-    {
-      atomic_set(&status, STATUS_ERROR);
-      return;
-    }
-
-    imu_msg.header.stamp.sec = ts.tv_sec;
-    imu_msg.header.stamp.nanosec = ts.tv_nsec;
-    if (uros_pub(&uros_imu_pub, &imu_msg) != RCL_RET_OK)
-    {
-      atomic_set(&status, STATUS_ERROR);
-      return;
-    }
-
-    k_sleep(K_MSEC(500));
+    atomic_set(&status, STATUS_ERROR);
+    return;
   }
 }
 
