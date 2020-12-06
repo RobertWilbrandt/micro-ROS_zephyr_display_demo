@@ -9,6 +9,7 @@
 
 #include <string.h>
 #include <drivers/sensor.h>
+#include <sys/byteorder.h>
 #include <errno.h>
 #include <init.h>
 
@@ -69,15 +70,64 @@ void l3gd20_convert_temp(const struct l3gd20_data* l3gd20_data, uint8_t sample_r
   val->val2 = 0;
 }
 
+void l3gd20_convert_gyro(const struct l3gd20_data* l3gd20_data, uint8_t sample_l, uint8_t sample_h,
+                         struct sensor_value* val)
+{
+  uint16_t sample_raw = sys_be16_to_cpu((sample_l << 8) + sample_h);
+  val->val1 = (int16_t)sample_raw;
+}
+
 int l3gd20_sample_fetch(const struct device* dev, enum sensor_channel chan)
 {
   struct l3gd20_data* data = dev->data;
-  uint8_t sample_raw;
 
+  // Handle temperature data
   if (chan == SENSOR_CHAN_DIE_TEMP || chan == SENSOR_CHAN_ALL)
   {
-    L3GD20_RET_STATUS_IF_ERR(l3gd20_read_reg(dev, L3GD20_REG_OUT_TEMP, &sample_raw));
-    data->last_sample.data[L3GD20_SAMPLE_TEMP] = data->temp_offset + (data->temp_offset - sample_raw);
+    uint8_t temp_sample_raw;
+    L3GD20_RET_STATUS_IF_ERR(l3gd20_read_reg(dev, L3GD20_REG_OUT_TEMP, &temp_sample_raw));
+    data->last_sample.data[L3GD20_SAMPLE_TEMP] = data->temp_offset + (data->temp_offset - temp_sample_raw);
+
+    if (chan == SENSOR_CHAN_DIE_TEMP)
+    {
+      return 0;
+    }
+  }
+
+  // Handle gyro data
+  uint8_t from_reg, to_reg;
+  size_t sample_base_idx;
+  switch (chan)
+  {
+    case SENSOR_CHAN_GYRO_X:
+      from_reg = L3GD20_REG_OUT_X_L;
+      to_reg = L3GD20_REG_OUT_X_H;
+      sample_base_idx = L3GD20_SAMPLE_GYRO_X_L;
+      break;
+    case SENSOR_CHAN_GYRO_Y:
+      from_reg = L3GD20_REG_OUT_Y_L;
+      to_reg = L3GD20_REG_OUT_Y_H;
+      sample_base_idx = L3GD20_SAMPLE_GYRO_Y_L;
+      break;
+    case SENSOR_CHAN_GYRO_Z:
+      from_reg = L3GD20_REG_OUT_Z_L;
+      to_reg = L3GD20_REG_OUT_Z_H;
+      sample_base_idx = L3GD20_SAMPLE_GYRO_Z_L;
+      break;
+    case SENSOR_CHAN_GYRO_XYZ:
+    case SENSOR_CHAN_ALL:
+      from_reg = L3GD20_REG_OUT_X_L;
+      to_reg = L3GD20_REG_OUT_Z_H;
+      sample_base_idx = L3GD20_SAMPLE_GYRO_X_L;
+      break;
+
+    default:
+      return -ENOTSUP;
+  }
+
+  for (size_t i = 0; i <= (to_reg - from_reg); ++i)
+  {
+    L3GD20_RET_STATUS_IF_ERR(l3gd20_read_reg(dev, from_reg + i, &data->last_sample.data[sample_base_idx + i]));
   }
 
   return 0;
@@ -90,6 +140,25 @@ static int l3gd20_channel_get(const struct device* dev, enum sensor_channel chan
   {
     case SENSOR_CHAN_DIE_TEMP:
       l3gd20_convert_temp(data, data->last_sample.data[L3GD20_SAMPLE_TEMP], val);
+      return 0;
+    case SENSOR_CHAN_GYRO_X:
+      l3gd20_convert_gyro(data, data->last_sample.data[L3GD20_SAMPLE_GYRO_X_L],
+                          data->last_sample.data[L3GD20_SAMPLE_GYRO_X_H], val);
+      return 0;
+    case SENSOR_CHAN_GYRO_Y:
+      l3gd20_convert_gyro(data, data->last_sample.data[L3GD20_SAMPLE_GYRO_Y_L],
+                          data->last_sample.data[L3GD20_SAMPLE_GYRO_Y_H], val);
+      return 0;
+    case SENSOR_CHAN_GYRO_Z:
+      l3gd20_convert_gyro(data, data->last_sample.data[L3GD20_SAMPLE_GYRO_Z_L],
+                          data->last_sample.data[L3GD20_SAMPLE_GYRO_Z_H], val);
+      return 0;
+    case SENSOR_CHAN_GYRO_XYZ:
+      for (size_t i = 0; i < 3; ++i)
+      {
+        l3gd20_convert_gyro(data, data->last_sample.data[L3GD20_SAMPLE_GYRO_X_L + 2 * i],
+                            data->last_sample.data[L3GD20_SAMPLE_GYRO_X_H + 2 * i], &val[i]);
+      }
       return 0;
 
     default:

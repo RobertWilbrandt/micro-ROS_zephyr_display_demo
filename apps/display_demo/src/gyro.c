@@ -77,24 +77,24 @@ int gyro_start()
 
 void gyro_temp_timer_cb(rcl_timer_t* timer, int64_t last_call_time)
 {
-  sensor_msgs__msg__Temperature temp_msg = { 0 };
-  temp_msg.header.frame_id.data = "";
-  temp_msg.header.frame_id.size = strlen(temp_msg.header.frame_id.data);
-
-  // Read sensor values
-  struct sensor_value temp;
-  if (sensor_sample_fetch(gyro_dev) != 0)
+  // Fetch sensor data
+  if (sensor_sample_fetch_chan(gyro_dev, SENSOR_CHAN_DIE_TEMP) != 0)
   {
     atomic_set(&status, STATUS_ERROR);
     return;
   }
 
+  // Read sensor values
+  struct sensor_value temp;
   if (sensor_channel_get(gyro_dev, SENSOR_CHAN_DIE_TEMP, &temp) != 0)
   {
     atomic_set(&status, STATUS_ERROR);
     return;
   };
 
+  sensor_msgs__msg__Temperature temp_msg = { 0 };
+  temp_msg.header.frame_id.data = "";
+  temp_msg.header.frame_id.size = strlen(temp_msg.header.frame_id.data);
   temp_msg.temperature = sensor_value_to_double(&temp);
 
   struct timespec ts;
@@ -111,6 +111,21 @@ void gyro_temp_timer_cb(rcl_timer_t* timer, int64_t last_call_time)
 
 void gyro_imu_timer_cb(rcl_timer_t* timer, int64_t last_call_time)
 {
+  // Fetch sensor data
+  if (sensor_sample_fetch_chan(gyro_dev, SENSOR_CHAN_GYRO_XYZ) != 0)
+  {
+    atomic_set(&status, STATUS_ERROR);
+    return;
+  }
+
+  // Read sensor values
+  struct sensor_value data[3];
+  if (sensor_channel_get(gyro_dev, SENSOR_CHAN_GYRO_XYZ, data) != 0)
+  {
+    atomic_set(&status, STATUS_ERROR);
+    return;
+  }
+
   sensor_msgs__msg__Imu imu_msg = { 0 };
   imu_msg.header.frame_id.data = "";
   imu_msg.header.frame_id.size = strlen(imu_msg.header.frame_id.data);
@@ -130,6 +145,9 @@ void gyro_imu_timer_cb(rcl_timer_t* timer, int64_t last_call_time)
   memset(&imu_msg.linear_acceleration_covariance[1], 0, 8);
 
   // Indicate that we don't know the covariance of our angular velocity
+  imu_msg.angular_velocity.x = sensor_value_to_double(&data[0]);
+  imu_msg.angular_velocity.y = sensor_value_to_double(&data[1]);
+  imu_msg.angular_velocity.z = sensor_value_to_double(&data[2]);
   memset(imu_msg.angular_velocity_covariance, 0, 9);
 
   struct timespec ts;
