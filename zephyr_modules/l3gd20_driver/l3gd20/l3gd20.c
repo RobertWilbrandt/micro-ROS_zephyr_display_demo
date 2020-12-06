@@ -28,12 +28,12 @@
     }                                                                                                                  \
   }
 
-int l3gd20_read_reg(const struct device* dev, uint8_t reg_addr, uint8_t* value)
+int l3gd20_read_reg(const struct device* dev, enum l3gd20_reg address, uint8_t* value)
 {
   struct l3gd20_data* data = dev->data;
   const struct l3gd20_config* cfg = dev->config;
 
-  uint8_t buffer_tx[2] = { reg_addr | L3GD20_SPI_READ_BIT, 0 };
+  uint8_t buffer_tx[2] = { address | L3GD20_SPI_READ_BIT, 0 };
   const struct spi_buf tx_buf = { .buf = buffer_tx, .len = 2 };
   const struct spi_buf_set tx = { .buffers = &tx_buf, .count = 1 };
 
@@ -45,12 +45,12 @@ int l3gd20_read_reg(const struct device* dev, uint8_t reg_addr, uint8_t* value)
   return 0;
 }
 
-int l3gd20_write_reg(const struct device* dev, uint8_t reg_addr, uint8_t value)
+int l3gd20_write_reg(const struct device* dev, enum l3gd20_reg address, uint8_t value)
 {
   struct l3gd20_data* data = dev->data;
   const struct l3gd20_config* cfg = dev->config;
 
-  uint8_t buffer_tx[2] = { reg_addr & ~L3GD20_SPI_READ_BIT, value };
+  uint8_t buffer_tx[2] = { address & ~L3GD20_SPI_READ_BIT, value };
   const struct spi_buf tx_buf = { .buf = buffer_tx, .len = 2 };
   const struct spi_buf_set tx = { .buffers = &tx_buf, .count = 1 };
 
