@@ -26,9 +26,15 @@ enum l3gd20_reg
   L3GD20_REG_OUT_TEMP = 0x26
 };
 
+enum l3gd20_sample_idx
+{
+  L3GD20_SAMPLE_TEMP = 0,
+  L3GD20_SAMPLE_MAX
+};
+
 struct l3gd20_sample
 {
-  uint8_t temp;
+  uint8_t data[L3GD20_SAMPLE_MAX];
 };
 
 struct l3gd20_data

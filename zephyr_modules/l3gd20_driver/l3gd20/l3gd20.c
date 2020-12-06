@@ -7,6 +7,7 @@
 
 #include "l3gd20.h"
 
+#include <string.h>
 #include <drivers/sensor.h>
 #include <errno.h>
 #include <init.h>
@@ -76,7 +77,7 @@ int l3gd20_sample_fetch(const struct device* dev, enum sensor_channel chan)
   if (chan == SENSOR_CHAN_DIE_TEMP || chan == SENSOR_CHAN_ALL)
   {
     L3GD20_RET_STATUS_IF_ERR(l3gd20_read_reg(dev, L3GD20_REG_OUT_TEMP, &sample_raw));
-    data->last_sample.temp = data->temp_offset + (data->temp_offset - sample_raw);
+    data->last_sample.data[L3GD20_SAMPLE_TEMP] = data->temp_offset + (data->temp_offset - sample_raw);
   }
 
   return 0;
@@ -88,7 +89,7 @@ static int l3gd20_channel_get(const struct device* dev, enum sensor_channel chan
   switch (chan)
   {
     case SENSOR_CHAN_DIE_TEMP:
-      l3gd20_convert_temp(data, data->last_sample.temp, val);
+      l3gd20_convert_temp(data, data->last_sample.data[L3GD20_SAMPLE_TEMP], val);
       return 0;
 
     default:
@@ -137,7 +138,7 @@ int l3gd20_init(const struct device* dev)
   L3GD20_RET_VAL_IF_ERR(l3gd20_read_reg(dev, L3GD20_REG_OUT_TEMP, &l3gd20->temp_offset), -EIO);
 
   // Initialize last sample
-  l3gd20->last_sample.temp = 0;
+  memset(l3gd20->last_sample.data, 0, L3GD20_SAMPLE_MAX * sizeof(uint8_t));
 
   return 0;
 }
