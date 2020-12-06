@@ -2,11 +2,22 @@
 
 cmake_minimum_required(VERSION 3.13.1)
 
+# Check if board is compatible with this application
 set(COMPATIBLE_BOARDS stm32f429i_disc1 native_posix)
 if(NOT ${BOARD} IN_LIST COMPATIBLE_BOARDS)
   message(FATAL_ERROR "App $ENV{UROS_APP} not compatible with board ${BOARD}")
 endif()
 
+# Add external zephyr modules
+set(ZEPHYR_EXTRA_MODULES "")
+get_filename_component(EXTERNAL_MODULE_BASE_DIR "../../zephyr_modules" ABSOLUTE)
+
+if(${BOARD} STREQUAL stm32f429i_disc1)
+  list(APPEND ZEPHYR_EXTRA_MODULES "${EXTERNAL_MODULE_BASE_DIR}/l3gd20_driver")
+  message(STATUS "Using external zephyr module l3gd20_driver")
+endif()
+
+# Include zephyr
 include($ENV{ZEPHYR_BASE}/cmake/app/boilerplate.cmake NO_POLICY_SCOPE)
 project(microrosapp C CXX)
 
