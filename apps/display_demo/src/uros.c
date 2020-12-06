@@ -9,6 +9,7 @@
 #include <rclc/rclc.h>
 #include <rclc/executor.h>
 #include <zephyr.h>
+#include <stdlib.h>
 
 #define UROS_THREAD_STACK_SIZE 16384
 #define UROS_THREAD_PRIORITY 3
@@ -83,7 +84,7 @@ void uros_thread(void* param1, void* param2, void* param3)
   // Start by allocating all required support structures
   if (uros_pub_list_cnt > 0)
   {
-    uros_publishers = k_malloc(uros_pub_list_cnt * sizeof(rcl_publisher_t));
+    uros_publishers = (rcl_publisher_t*)malloc(uros_pub_list_cnt * sizeof(rcl_publisher_t));
     if (uros_publishers == NULL)
     {
       atomic_set(&status, STATUS_ERROR);
@@ -94,7 +95,7 @@ void uros_thread(void* param1, void* param2, void* param3)
 
   if (uros_timer_list_cnt > 0)
   {
-    uros_timers = k_malloc(uros_timer_list_cnt * sizeof(rcl_timer_t));
+    uros_timers = (rcl_timer_t*)malloc(uros_timer_list_cnt * sizeof(rcl_timer_t));
     if (uros_timers == NULL)
     {
       atomic_set(&status, STATUS_ERROR);
