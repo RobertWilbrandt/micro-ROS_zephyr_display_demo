@@ -36,15 +36,31 @@ int l3gd20_read_reg(const struct device* dev, enum l3gd20_reg address, uint8_t* 
   const struct l3gd20_config* cfg = dev->config;
 
   uint8_t read_cmd = address | (L3GD20_SPI_READ_BIT & ~L3GD20_SPI_MS_BIT);  // Read, don't increment address
-  uint8_t buffer_tx[2] = { read_cmd, 0 };
-  const struct spi_buf tx_buf = { .buf = buffer_tx, .len = 2 };
-  const struct spi_buf_set tx = { .buffers = &tx_buf, .count = 1 };
+  const struct spi_buf tx_buf[2] = { { .buf = &read_cmd, .len = 1 }, { .buf = NULL, .len = 1 } };
+  const struct spi_buf_set tx = { .buffers = tx_buf, .count = 1 };
 
   const struct spi_buf rx_buf[2] = { { .buf = NULL, .len = 1 }, { .buf = value, .len = 1 } };
   const struct spi_buf_set rx = { .buffers = rx_buf, .count = 2 };
 
   L3GD20_RET_VAL_IF_ERR(spi_transceive(data->bus, &cfg->spi_conf, &tx, &rx), -EIO);
+  return 0;
+}
 
+int l3gd20_read_regs(const struct device* dev, enum l3gd20_reg from, enum l3gd20_reg to, uint8_t* values)
+{
+  struct l3gd20_data* data = dev->data;
+  const struct l3gd20_config* cfg = dev->config;
+
+  size_t num_regs = (to - from) + 1;
+
+  uint8_t read_cmd = from | (L3GD20_SPI_READ_BIT | L3GD20_SPI_MS_BIT);  // Read, increment address
+  const struct spi_buf tx_buf[2] = { { .buf = &read_cmd, .len = 1 }, { .buf = NULL, .len = num_regs } };
+  const struct spi_buf_set tx = { .buffers = tx_buf, .count = 2 };
+
+  const struct spi_buf rx_buf[2] = { { .buf = NULL, .len = 1 }, { .buf = values, .len = num_regs } };
+  const struct spi_buf_set rx = { .buffers = rx_buf, .count = 2 };
+
+  L3GD20_RET_VAL_IF_ERR(spi_transceive(data->bus, &cfg->spi_conf, &tx, &rx), -EIO);
   return 0;
 }
 
@@ -126,11 +142,7 @@ int l3gd20_sample_fetch(const struct device* dev, enum sensor_channel chan)
       return -ENOTSUP;
   }
 
-  for (size_t i = 0; i <= (to_reg - from_reg); ++i)
-  {
-    L3GD20_RET_STATUS_IF_ERR(l3gd20_read_reg(dev, from_reg + i, &data->last_sample.data[sample_base_idx + i]));
-  }
-
+  L3GD20_RET_STATUS_IF_ERR(l3gd20_read_regs(dev, from_reg, to_reg, &data->last_sample.data[sample_base_idx]));
   return 0;
 }
 
