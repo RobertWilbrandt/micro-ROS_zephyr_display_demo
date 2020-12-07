@@ -17,10 +17,9 @@
 #define L3GD20_Y_EN_BIT BIT(1)
 #define L3GD20_X_EN_BIT BIT(0)
 
-enum l3gd20_sample_idx
+enum l3gd20_sample_gyro_idx
 {
-  L3GD20_SAMPLE_TEMP = 0,
-  L3GD20_SAMPLE_GYRO_X_L,
+  L3GD20_SAMPLE_GYRO_X_L = 0,
   L3GD20_SAMPLE_GYRO_X_H,
   L3GD20_SAMPLE_GYRO_Y_L,
   L3GD20_SAMPLE_GYRO_Y_H,
@@ -31,7 +30,8 @@ enum l3gd20_sample_idx
 
 struct l3gd20_sample
 {
-  uint8_t data[L3GD20_SAMPLE_MAX];
+  uint8_t temp;
+  uint8_t gyro[L3GD20_SAMPLE_MAX];
 };
 
 struct l3gd20_data
