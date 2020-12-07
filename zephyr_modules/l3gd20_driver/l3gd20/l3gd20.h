@@ -8,11 +8,7 @@
 
 #include <device.h>
 #include <drivers/spi.h>
-#include <sys/util.h>
 #include <zephyr/types.h>
-
-#define L3GD20_SPI_READ_BIT BIT(7)
-#define L3GD20_SPI_MS_BIT BIT(6)
 
 #define L3GD20_WHOAMI 0xD4
 
@@ -20,19 +16,6 @@
 #define L3GD20_Z_EN_BIT BIT(2)
 #define L3GD20_Y_EN_BIT BIT(1)
 #define L3GD20_X_EN_BIT BIT(0)
-
-enum l3gd20_reg
-{
-  L3GD20_REG_WHOAMI = 0x0F,
-  L3GD20_REG_CTRL_REG1 = 0x20,
-  L3GD20_REG_OUT_TEMP = 0x26,
-  L3GD20_REG_OUT_X_L = 0x28,
-  L3GD20_REG_OUT_X_H = 0x29,
-  L3GD20_REG_OUT_Y_L = 0x2A,
-  L3GD20_REG_OUT_Y_H = 0x2B,
-  L3GD20_REG_OUT_Z_L = 0x2C,
-  L3GD20_REG_OUT_Z_H = 0x2D
-};
 
 enum l3gd20_sample_idx
 {
