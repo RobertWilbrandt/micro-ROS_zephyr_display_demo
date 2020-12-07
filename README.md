@@ -26,7 +26,7 @@ and use the ```UROS_CUSTOM_APP_FOLDER``` environment variable to build and flash
 ```console
 $ cd <uros_ws_path>
 $ source install/setup.zsh  # Depending on the shell you use
-$ export UROS_CUSTOM_APP_FOLDER=<zephyr_demo_path>
+$ export UROS_CUSTOM_APP_FOLDER=<zephyr_demo_path>/apps
 $ ros2 run micro_ros_setup build_firmware.sh -f
 $ ros2 run micro_ros_setup flash_firmware.sh
 ```
