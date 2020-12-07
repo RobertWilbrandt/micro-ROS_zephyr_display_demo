@@ -66,22 +66,27 @@ int display_init()
   // Status CONNECTING: Create Top-Right spinner
   lv_obj_t* connecting_spinner = lv_spinner_create(lv_scr_act(), NULL);
   lv_obj_set_size(connecting_spinner, 25, 25);
-  lv_obj_set_style_local_line_color(connecting_spinner, LV_SPINNER_PART_INDIC, LV_STATE_DEFAULT, LV_COLOR_GRAY);
-  lv_obj_set_style_local_line_width(connecting_spinner, LV_SPINNER_PART_BG, LV_STATE_DEFAULT, 5);
-  lv_obj_set_style_local_line_width(connecting_spinner, LV_SPINNER_PART_INDIC, LV_STATE_DEFAULT, 5);
+  lv_obj_set_style_local_line_color(connecting_spinner, LV_SPINNER_PART_INDIC,
+                                    LV_STATE_DEFAULT, LV_COLOR_GRAY);
+  lv_obj_set_style_local_line_width(connecting_spinner, LV_SPINNER_PART_BG,
+                                    LV_STATE_DEFAULT, 5);
+  lv_obj_set_style_local_line_width(connecting_spinner, LV_SPINNER_PART_INDIC,
+                                    LV_STATE_DEFAULT, 5);
   lv_obj_align(connecting_spinner, NULL, LV_ALIGN_IN_TOP_RIGHT, -10, 10);
   status_elems[STATUS_CONNECTING][0] = connecting_spinner;
 
   // Status CONNECTING: Create label next to spinner
   lv_obj_t* connecting_label = lv_label_create(lv_scr_act(), NULL);
   lv_label_set_text(connecting_label, "Connecting...");
-  lv_obj_align(connecting_label, connecting_spinner, LV_ALIGN_OUT_LEFT_MID, -10, 0);
+  lv_obj_align(connecting_label, connecting_spinner, LV_ALIGN_OUT_LEFT_MID, -10,
+               0);
   status_elems[STATUS_CONNECTING][1] = connecting_label;
 
   // Status RUNNING: Create green led
   lv_obj_t* running_led = lv_led_create(lv_scr_act(), NULL);
   lv_led_on(running_led);
-  lv_obj_set_style_local_bg_color(running_led, LV_LED_PART_MAIN, LV_STATE_DEFAULT, LV_COLOR_GREEN);
+  lv_obj_set_style_local_bg_color(running_led, LV_LED_PART_MAIN,
+                                  LV_STATE_DEFAULT, LV_COLOR_GREEN);
   lv_obj_set_size(running_led, 25, 25);
   lv_obj_align(running_led, NULL, LV_ALIGN_IN_TOP_RIGHT, -10, 10);
   lv_obj_set_hidden(running_led, true);
@@ -97,7 +102,8 @@ int display_init()
   // Status ERROR: Create red led
   lv_obj_t* error_led = lv_led_create(lv_scr_act(), NULL);
   lv_led_on(error_led);
-  lv_obj_set_style_local_bg_color(error_led, LV_LED_PART_MAIN, LV_STATE_DEFAULT, LV_COLOR_RED);
+  lv_obj_set_style_local_bg_color(error_led, LV_LED_PART_MAIN, LV_STATE_DEFAULT,
+                                  LV_COLOR_RED);
   lv_obj_set_size(error_led, 25, 25);
   lv_obj_align(error_led, NULL, LV_ALIGN_IN_TOP_RIGHT, -10, 10);
   lv_obj_set_hidden(error_led, true);
@@ -176,7 +182,8 @@ void update_uptime_label()
   const unsigned int minutes = seconds / 60;
   const unsigned int hours = minutes / 60;
 
-  snprintf(uptime_text, sizeof(uptime_text) / sizeof(char), uptime_format, hours % 1000, minutes % 60, seconds % 60,
+  snprintf(uptime_text, sizeof(uptime_text) / sizeof(char), uptime_format,
+           hours % 1000, minutes % 60, seconds % 60,
            (milliseconds % 1000) / 100);
   lv_label_set_text(uptime_label, uptime_text);
   lv_obj_align(uptime_label, NULL, LV_ALIGN_IN_BOTTOM_RIGHT, -10, -10);

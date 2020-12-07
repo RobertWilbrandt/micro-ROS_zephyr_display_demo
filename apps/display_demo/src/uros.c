@@ -14,19 +14,19 @@
 #define UROS_THREAD_STACK_SIZE 16384
 #define UROS_THREAD_PRIORITY 3
 
-#define RCCHECK(fn)                                                                                                    \
-  {                                                                                                                    \
-    rcl_ret_t temp_rc = fn;                                                                                            \
-    if ((temp_rc != RCL_RET_OK))                                                                                       \
-    {                                                                                                                  \
-      atomic_set(&status, STATUS_ERROR);                                                                               \
-      return;                                                                                                          \
-    }                                                                                                                  \
+#define RCCHECK(fn)                                                            \
+  {                                                                            \
+    rcl_ret_t temp_rc = fn;                                                    \
+    if ((temp_rc != RCL_RET_OK))                                               \
+    {                                                                          \
+      atomic_set(&status, STATUS_ERROR);                                       \
+      return;                                                                  \
+    }                                                                          \
   }
-#define RCSOFTCHECK(fn)                                                                                                \
-  {                                                                                                                    \
-    rcl_ret_t temp_rc = fn;                                                                                            \
-    if ((temp_rc != RCL_RET_OK)) {}                                                                                    \
+#define RCSOFTCHECK(fn)                                                        \
+  {                                                                            \
+    rcl_ret_t temp_rc = fn;                                                    \
+    if ((temp_rc != RCL_RET_OK)) {}                                            \
   }
 
 #include "status.h"
@@ -70,8 +70,9 @@ int uros_init()
 
 int uros_start()
 {
-  k_thread_create(&uros_thread_stack_data, uros_thread_stack_area, K_THREAD_STACK_SIZEOF(uros_thread_stack_area),
-                  &uros_thread, NULL, NULL, NULL, UROS_THREAD_PRIORITY, 0, K_NO_WAIT);
+  k_thread_create(&uros_thread_stack_data, uros_thread_stack_area,
+                  K_THREAD_STACK_SIZEOF(uros_thread_stack_area), &uros_thread,
+                  NULL, NULL, NULL, UROS_THREAD_PRIORITY, 0, K_NO_WAIT);
   return 0;
 }
 
@@ -84,7 +85,8 @@ void uros_thread(void* param1, void* param2, void* param3)
   // Start by allocating all required support structures
   if (uros_pub_list_cnt > 0)
   {
-    uros_publishers = (rcl_publisher_t*)malloc(uros_pub_list_cnt * sizeof(rcl_publisher_t));
+    uros_publishers =
+        (rcl_publisher_t*)malloc(uros_pub_list_cnt * sizeof(rcl_publisher_t));
     if (uros_publishers == NULL)
     {
       atomic_set(&status, STATUS_ERROR);
@@ -95,7 +97,8 @@ void uros_thread(void* param1, void* param2, void* param3)
 
   if (uros_timer_list_cnt > 0)
   {
-    uros_timers = (rcl_timer_t*)malloc(uros_timer_list_cnt * sizeof(rcl_timer_t));
+    uros_timers =
+        (rcl_timer_t*)malloc(uros_timer_list_cnt * sizeof(rcl_timer_t));
     if (uros_timers == NULL)
     {
       atomic_set(&status, STATUS_ERROR);
@@ -113,7 +116,8 @@ void uros_thread(void* param1, void* param2, void* param3)
   rclc_support_t support;
   while (true)
   {
-    rcl_ret_t support_init_ret = rclc_support_init(&support, 0, NULL, &allocator);
+    rcl_ret_t support_init_ret =
+        rclc_support_init(&support, 0, NULL, &allocator);
 
     if (support_init_ret == RCL_RET_OK)
     {
@@ -133,15 +137,19 @@ void uros_thread(void* param1, void* param2, void* param3)
   }
 
   rcl_node_t node = rcl_get_zero_initialized_node();
-  RCCHECK(rclc_node_init_default(&node, "microros_zephyr_display_demo", "", &support));
+  RCCHECK(rclc_node_init_default(&node, "microros_zephyr_display_demo", "",
+                                 &support));
 
   // Add publishers
   size_t cur_node_i = 0;
-  for (struct uros_pub_handle* cur_node = SYS_SLIST_PEEK_HEAD_CONTAINER(&uros_pub_list, cur_node, node);
-       cur_node != NULL; cur_node = SYS_SLIST_PEEK_NEXT_CONTAINER(cur_node, node))
+  for (struct uros_pub_handle* cur_node =
+           SYS_SLIST_PEEK_HEAD_CONTAINER(&uros_pub_list, cur_node, node);
+       cur_node != NULL;
+       cur_node = SYS_SLIST_PEEK_NEXT_CONTAINER(cur_node, node))
   {
     rcl_ret_t pub_init_ret =
-        rclc_publisher_init_default(&uros_publishers[cur_node_i], &node, cur_node->type, cur_node->topic_name);
+        rclc_publisher_init_default(&uros_publishers[cur_node_i], &node,
+                                    cur_node->type, cur_node->topic_name);
     if (pub_init_ret != RCL_RET_OK)
     {
       atomic_set(&status, STATUS_ERROR);
@@ -159,11 +167,15 @@ void uros_thread(void* param1, void* param2, void* param3)
 
   // Add timers
   size_t cur_timer_i = 0;
-  for (struct uros_timer_handle* cur_timer = SYS_SLIST_PEEK_HEAD_CONTAINER(&uros_timer_list, cur_timer, node);
-       cur_timer != NULL; cur_timer = SYS_SLIST_PEEK_NEXT_CONTAINER(cur_timer, node))
+  for (struct uros_timer_handle* cur_timer =
+           SYS_SLIST_PEEK_HEAD_CONTAINER(&uros_timer_list, cur_timer, node);
+       cur_timer != NULL;
+       cur_timer = SYS_SLIST_PEEK_NEXT_CONTAINER(cur_timer, node))
   {
-    rcl_ret_t timer_init_ret = rclc_timer_init_default(&uros_timers[cur_timer_i], &support,
-                                                       RCL_MS_TO_NS(cur_timer->timeout_ms), cur_timer->cb);
+    rcl_ret_t timer_init_ret =
+        rclc_timer_init_default(&uros_timers[cur_timer_i], &support,
+                                RCL_MS_TO_NS(cur_timer->timeout_ms),
+                                cur_timer->cb);
     if (timer_init_ret != RCL_RET_OK)
     {
       atomic_set(&status, STATUS_ERROR);
@@ -181,7 +193,8 @@ void uros_thread(void* param1, void* param2, void* param3)
 
   // Create executor
   rclc_executor_t executor;
-  rclc_executor_init(&executor, &support.context, uros_timer_list_cnt, &allocator);
+  rclc_executor_init(&executor, &support.context, uros_timer_list_cnt,
+                     &allocator);
   for (size_t i = 0; i < uros_timer_list_cnt; ++i)
   {
     RCCHECK(rclc_executor_add_timer(&executor, &uros_timers[i]));

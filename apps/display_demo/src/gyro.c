@@ -47,7 +47,8 @@ int gyro_init()
   }
 
   // Create uros publisher
-  uros_temp_pub.type = ROSIDL_GET_MSG_TYPE_SUPPORT(sensor_msgs, msg, Temperature);
+  uros_temp_pub.type =
+      ROSIDL_GET_MSG_TYPE_SUPPORT(sensor_msgs, msg, Temperature);
   uros_temp_pub.topic_name = "l3gd20_temp";
   uros_add_pub(&uros_temp_pub);
 

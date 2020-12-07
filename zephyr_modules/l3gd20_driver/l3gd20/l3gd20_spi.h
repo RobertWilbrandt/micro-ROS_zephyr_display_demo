@@ -27,12 +27,15 @@ enum l3gd20_reg
   L3GD20_REG_OUT_Z_H = 0x2D
 };
 
-int l3gd20_read_reg(const struct device* spi_bus, const struct spi_config* spi_conf, enum l3gd20_reg reg,
+int l3gd20_read_reg(const struct device* spi_bus,
+                    const struct spi_config* spi_conf, enum l3gd20_reg reg,
                     uint8_t* value);
-int l3gd20_read_regs(const struct device* spi_bus, const struct spi_config* spi_conf, enum l3gd20_reg from,
+int l3gd20_read_regs(const struct device* spi_bus,
+                     const struct spi_config* spi_conf, enum l3gd20_reg from,
                      enum l3gd20_reg to, uint8_t* values);
 
-int l3gd20_write_reg(const struct device* spi_bus, const struct spi_config* spi_conf, enum l3gd20_reg reg,
+int l3gd20_write_reg(const struct device* spi_bus,
+                     const struct spi_config* spi_conf, enum l3gd20_reg reg,
                      uint8_t value);
 
 #endif  // MICRO_ROS_ZEPHYR_DISPLAY_DEMO_DRIVERS_SENSORS_L3GD20_L3GD20_SPI_H

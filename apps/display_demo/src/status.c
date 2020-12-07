@@ -62,19 +62,22 @@ const struct device* error_led_dev;
 
 // Thread structures
 void status_led_thread(void* param1, void* param2, void* param3);
-K_THREAD_STACK_DEFINE(status_led_thread_stack_area, STATUS_LED_THREAD_STACK_SIZE);
+K_THREAD_STACK_DEFINE(status_led_thread_stack_area,
+                      STATUS_LED_THREAD_STACK_SIZE);
 struct k_thread status_led_thread_stack_data;
 
 int status_init_hw()
 {
   status_led_dev = device_get_binding(STATUS_LED_LABEL);
-  if (gpio_pin_configure(status_led_dev, STATUS_LED_PIN, GPIO_OUTPUT_ACTIVE | STATUS_LED_FLAGS) != 0)
+  if (gpio_pin_configure(status_led_dev, STATUS_LED_PIN,
+                         GPIO_OUTPUT_ACTIVE | STATUS_LED_FLAGS) != 0)
   {
     return -EIO;
   }
 
   error_led_dev = device_get_binding(ERROR_LED_LABEL);
-  if (gpio_pin_configure(error_led_dev, ERROR_LED_PIN, GPIO_OUTPUT_ACTIVE | ERROR_LED_FLAGS) != 0)
+  if (gpio_pin_configure(error_led_dev, ERROR_LED_PIN,
+                         GPIO_OUTPUT_ACTIVE | ERROR_LED_FLAGS) != 0)
   {
     return -EIO;
   }
@@ -86,12 +89,14 @@ int status_init_hw()
 int status_start_hw()
 {
   k_thread_create(&status_led_thread_stack_data, status_led_thread_stack_area,
-                  K_THREAD_STACK_SIZEOF(status_led_thread_stack_area), &status_led_thread, NULL, NULL, NULL,
+                  K_THREAD_STACK_SIZEOF(status_led_thread_stack_area),
+                  &status_led_thread, NULL, NULL, NULL,
                   STATUS_LED_THREAD_PRIORITY, 0, K_NO_WAIT);
   return 0;
 }
 
-void status_led_blink_step(const struct device* status_led_dev, bool status_on, status_t expected_status)
+void status_led_blink_step(const struct device* status_led_dev, bool status_on,
+                           status_t expected_status)
 {
   if (atomic_get(&status) != expected_status)
   {
