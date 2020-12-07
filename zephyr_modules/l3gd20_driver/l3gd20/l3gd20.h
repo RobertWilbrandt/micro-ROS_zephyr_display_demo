@@ -12,6 +12,8 @@
 #include <zephyr/types.h>
 
 #define L3GD20_SPI_READ_BIT BIT(7)
+#define L3GD20_SPI_MS_BIT BIT(6)
+
 #define L3GD20_WHOAMI 0xD4
 
 #define L3GD20_PD_BIT BIT(3)
