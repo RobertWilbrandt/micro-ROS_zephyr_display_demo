@@ -181,7 +181,7 @@ int l3gd20_init(const struct device* dev)
   // Set CTRL_REG 2 - 5
   L3GD20_RET_VAL_IF_ERR(l3gd20_write_regs(data->bus, &cfg->spi_conf,
                                           L3GD20_REG_CTRL_REG2,
-                                          L3GD20_REG_CTRL_REG5, &ctrl_words[2]),
+                                          L3GD20_REG_CTRL_REG5, &ctrl_words[1]),
                         -EIO);
 
   // Set CTRL_REG_1
