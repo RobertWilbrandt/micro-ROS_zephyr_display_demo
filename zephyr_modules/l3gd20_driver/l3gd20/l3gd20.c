@@ -173,7 +173,7 @@ int l3gd20_init(const struct device* dev)
     ,
     0  // CTRL_REG3: TODO: INT1/2 + FIFO configuration
     ,
-    0  // CTRL_REG4: TODO: BDU, BLE, scale selection
+    L3GD20_CTRL_REG4_BDU_BIT  // CTRL_REG4: Enable BDU, TODO: BDU, BLE, scale selection
     ,
     0  // CTRL_REG5: TODO: Block configuration
   };
