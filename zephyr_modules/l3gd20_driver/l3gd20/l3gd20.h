@@ -39,19 +39,15 @@ enum l3gd20_reg
 
 enum l3gd20_sample_gyro_idx
 {
-  L3GD20_SAMPLE_GYRO_X_L = 0,
-  L3GD20_SAMPLE_GYRO_X_H,
-  L3GD20_SAMPLE_GYRO_Y_L,
-  L3GD20_SAMPLE_GYRO_Y_H,
-  L3GD20_SAMPLE_GYRO_Z_L,
-  L3GD20_SAMPLE_GYRO_Z_H,
-  L3GD20_SAMPLE_MAX
+  L3GD20_SAMPLE_GYRO_X = 0,
+  L3GD20_SAMPLE_GYRO_Y,
+  L3GD20_SAMPLE_GYRO_Z,
 };
 
 struct l3gd20_sample
 {
   uint8_t temp;
-  uint8_t gyro[L3GD20_SAMPLE_MAX];
+  uint16_t gyro[3];
 };
 
 struct l3gd20_data

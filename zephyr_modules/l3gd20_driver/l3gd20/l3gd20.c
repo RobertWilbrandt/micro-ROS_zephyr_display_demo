@@ -23,14 +23,10 @@ void l3gd20_convert_temp(const struct l3gd20_data* l3gd20_data,
   val->val2 = 0;
 }
 
-void l3gd20_convert_gyro(const struct l3gd20_data* l3gd20_data,
-                         uint8_t sample_l, uint8_t sample_h,
+void l3gd20_convert_gyro(const struct l3gd20_data* l3gd20_data, uint16_t sample,
                          struct sensor_value* val)
 {
-  uint16_t sample_raw =
-      (sample_h << 8) + sample_l;  // Remember we set correct endianness in
-                                   // init, so no extra conversion required
-  val->val1 = (int16_t)sample_raw;
+  val->val1 = (int16_t)sample;  // TODO: Scaling
 }
 
 int l3gd20_sample_fetch(const struct device* dev, enum sensor_channel chan)
@@ -61,23 +57,23 @@ int l3gd20_sample_fetch(const struct device* dev, enum sensor_channel chan)
     case SENSOR_CHAN_GYRO_X:
       from_reg = L3GD20_REG_OUT_X_L;
       to_reg = L3GD20_REG_OUT_X_H;
-      sample_base_idx = L3GD20_SAMPLE_GYRO_X_L;
+      sample_base_idx = L3GD20_SAMPLE_GYRO_X;
       break;
     case SENSOR_CHAN_GYRO_Y:
       from_reg = L3GD20_REG_OUT_Y_L;
       to_reg = L3GD20_REG_OUT_Y_H;
-      sample_base_idx = L3GD20_SAMPLE_GYRO_Y_L;
+      sample_base_idx = L3GD20_SAMPLE_GYRO_Y;
       break;
     case SENSOR_CHAN_GYRO_Z:
       from_reg = L3GD20_REG_OUT_Z_L;
       to_reg = L3GD20_REG_OUT_Z_H;
-      sample_base_idx = L3GD20_SAMPLE_GYRO_Z_L;
+      sample_base_idx = L3GD20_SAMPLE_GYRO_Z;
       break;
     case SENSOR_CHAN_GYRO_XYZ:
     case SENSOR_CHAN_ALL:
       from_reg = L3GD20_REG_OUT_X_L;
       to_reg = L3GD20_REG_OUT_Z_H;
-      sample_base_idx = L3GD20_SAMPLE_GYRO_X_L;
+      sample_base_idx = L3GD20_SAMPLE_GYRO_X;
       break;
 
     default:
@@ -86,7 +82,7 @@ int l3gd20_sample_fetch(const struct device* dev, enum sensor_channel chan)
 
   L3GD20_RET_STATUS_IF_ERR(
       l3gd20_read_regs(data->bus, &cfg->spi_conf, from_reg, to_reg,
-                       &data->last_sample.gyro[sample_base_idx]));
+                       (uint8_t*)&data->last_sample.gyro[sample_base_idx]));
   return 0;
 }
 
@@ -101,23 +97,22 @@ static int l3gd20_channel_get(const struct device* dev,
       l3gd20_convert_temp(data, data->last_sample.temp, val);
       return 0;
     case SENSOR_CHAN_GYRO_X:
-      l3gd20_convert_gyro(data, data->last_sample.gyro[L3GD20_SAMPLE_GYRO_X_L],
-                          data->last_sample.gyro[L3GD20_SAMPLE_GYRO_X_H], val);
+      l3gd20_convert_gyro(data, data->last_sample.gyro[L3GD20_SAMPLE_GYRO_X],
+                          val);
       return 0;
     case SENSOR_CHAN_GYRO_Y:
-      l3gd20_convert_gyro(data, data->last_sample.gyro[L3GD20_SAMPLE_GYRO_Y_L],
-                          data->last_sample.gyro[L3GD20_SAMPLE_GYRO_Y_H], val);
+      l3gd20_convert_gyro(data, data->last_sample.gyro[L3GD20_SAMPLE_GYRO_Y],
+                          val);
       return 0;
     case SENSOR_CHAN_GYRO_Z:
-      l3gd20_convert_gyro(data, data->last_sample.gyro[L3GD20_SAMPLE_GYRO_Z_L],
-                          data->last_sample.gyro[L3GD20_SAMPLE_GYRO_Z_H], val);
+      l3gd20_convert_gyro(data, data->last_sample.gyro[L3GD20_SAMPLE_GYRO_Z],
+                          val);
       return 0;
     case SENSOR_CHAN_GYRO_XYZ:
       for (size_t i = 0; i < 3; ++i)
       {
         l3gd20_convert_gyro(
-            data, data->last_sample.gyro[L3GD20_SAMPLE_GYRO_X_L + 2 * i],
-            data->last_sample.gyro[L3GD20_SAMPLE_GYRO_X_H + 2 * i], &val[i]);
+            data, data->last_sample.gyro[L3GD20_SAMPLE_GYRO_X + i], &val[i]);
       }
       return 0;
 
@@ -204,7 +199,7 @@ int l3gd20_init(const struct device* dev)
                         -EIO);
 
   // Initialize last sample
-  memset(data->last_sample.gyro, 0, L3GD20_SAMPLE_MAX * sizeof(uint8_t));
+  memset(data->last_sample.gyro, 0, sizeof(data->last_sample.gyro));
 
   return 0;
 }
