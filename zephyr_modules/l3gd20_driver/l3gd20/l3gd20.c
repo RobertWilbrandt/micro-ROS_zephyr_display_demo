@@ -165,9 +165,24 @@ int l3gd20_init(const struct device* dev)
 
   uint8_t ctrl_words[] = {
     L3GD20_CTRL_REG1_X_EN_BIT | L3GD20_CTRL_REG1_Y_EN_BIT |
-    L3GD20_CTRL_REG1_Z_EN_BIT |
-    L3GD20_CTRL_REG1_PD_BIT  // Go to normal mode and enable axes, TODO: Bandwith + ODR
+        L3GD20_CTRL_REG1_Z_EN_BIT |
+        L3GD20_CTRL_REG1_PD_BIT  // CTRL_REG1: Go to normal mode and enable axes,
+                                 // TODO: Bandwith + ODR
+    ,
+    0  // CTRL_REG2: TODO: HPF mode + Cutoff selection
+    ,
+    0  // CTRL_REG3: TODO: INT1/2 + FIFO configuration
+    ,
+    0  // CTRL_REG4: TODO: BDU, BLE, scale selection
+    ,
+    0  // CTRL_REG5: TODO: Block configuration
   };
+
+  // Set CTRL_REG 2 - 5
+  L3GD20_RET_VAL_IF_ERR(l3gd20_write_regs(data->bus, &cfg->spi_conf,
+                                          L3GD20_REG_CTRL_REG2,
+                                          L3GD20_REG_CTRL_REG5, &ctrl_words[2]),
+                        -EIO);
 
   // Set CTRL_REG_1
   L3GD20_RET_VAL_IF_ERR(l3gd20_write_reg(data->bus, &cfg->spi_conf,
