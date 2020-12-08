@@ -36,6 +36,9 @@ int l3gd20_read_regs(const struct device* spi_bus,
 
 int l3gd20_write_reg(const struct device* spi_bus,
                      const struct spi_config* spi_conf, enum l3gd20_reg reg,
-                     uint8_t value);
+                     uint8_t* value);
+int l3gd20_write_regs(const struct device* spi_bus,
+                      const struct spi_config* spi_conf, enum l3gd20_reg from,
+                      enum l3gd20_reg to, uint8_t* values);
 
 #endif  // MICRO_ROS_ZEPHYR_DISPLAY_DEMO_DRIVERS_SENSORS_L3GD20_L3GD20_SPI_H

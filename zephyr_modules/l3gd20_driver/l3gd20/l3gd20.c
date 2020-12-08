@@ -160,10 +160,10 @@ int l3gd20_init(const struct device* dev)
   }
 
   // Set CTRL_REG_1
-  const uint8_t ctrl1_word =
+  uint8_t ctrl1_word =
       L3GD20_X_EN_BIT | L3GD20_Y_EN_BIT | L3GD20_Z_EN_BIT | L3GD20_PD_BIT;
   L3GD20_RET_VAL_IF_ERR(l3gd20_write_reg(data->bus, &cfg->spi_conf,
-                                         L3GD20_REG_CTRL_REG1, ctrl1_word),
+                                         L3GD20_REG_CTRL_REG1, &ctrl1_word),
                         -EIO);
 
   // Read temperature offset
