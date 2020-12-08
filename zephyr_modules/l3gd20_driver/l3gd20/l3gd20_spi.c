@@ -5,6 +5,7 @@
  */
 #include "l3gd20_spi.h"
 
+#include "l3gd20.h"
 #include "l3gd20_util.h"
 
 #include <drivers/spi.h>

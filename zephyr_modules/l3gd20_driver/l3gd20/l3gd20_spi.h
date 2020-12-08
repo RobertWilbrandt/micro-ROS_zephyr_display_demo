@@ -14,22 +14,7 @@
 #define L3GD20_SPI_READ_BIT BIT(7)
 #define L3GD20_SPI_MS_BIT BIT(6)
 
-enum l3gd20_reg
-{
-  L3GD20_REG_WHOAMI = 0x0F,
-  L3GD20_REG_CTRL_REG1 = 0x20,
-  L3GD20_REG_CTRL_REG2 = 0x21,
-  L3GD20_REG_CTRL_REG3 = 0x22,
-  L3GD20_REG_CTRL_REG4 = 0x23,
-  L3GD20_REG_CTRL_REG5 = 0x24,
-  L3GD20_REG_OUT_TEMP = 0x26,
-  L3GD20_REG_OUT_X_L = 0x28,
-  L3GD20_REG_OUT_X_H = 0x29,
-  L3GD20_REG_OUT_Y_L = 0x2A,
-  L3GD20_REG_OUT_Y_H = 0x2B,
-  L3GD20_REG_OUT_Z_L = 0x2C,
-  L3GD20_REG_OUT_Z_H = 0x2D
-};
+enum l3gd20_reg;
 
 int l3gd20_read_reg(const struct device* spi_bus,
                     const struct spi_config* spi_conf, enum l3gd20_reg reg,
