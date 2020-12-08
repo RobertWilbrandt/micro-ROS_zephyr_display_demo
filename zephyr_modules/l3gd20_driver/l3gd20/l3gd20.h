@@ -18,6 +18,7 @@
 #define L3GD20_CTRL_REG1_X_EN_BIT BIT(0)
 
 #define L3GD20_CTRL_REG4_BDU_BIT BIT(7)
+#define L3GD20_CTRL_REG4_BLE_BE_BIT BIT(6)
 
 enum l3gd20_reg
 {

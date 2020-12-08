@@ -27,7 +27,9 @@ void l3gd20_convert_gyro(const struct l3gd20_data* l3gd20_data,
                          uint8_t sample_l, uint8_t sample_h,
                          struct sensor_value* val)
 {
-  uint16_t sample_raw = sys_be16_to_cpu((sample_l << 8) + sample_h);
+  uint16_t sample_raw =
+      (sample_h << 8) + sample_l;  // Remember we set correct endianness in
+                                   // init, so no extra conversion required
   val->val1 = (int16_t)sample_raw;
 }
 
@@ -163,6 +165,12 @@ int l3gd20_init(const struct device* dev)
    * Start device initalization
    */
 
+#if __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
+  uint8_t ctrl_reg4_ble_bit = 0;
+#elif __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__
+  uint8_t ctrl_reg4_ble_bit = L3GD20_CTRL_REG4_BLE_BE_BIT;
+#endif
+
   uint8_t ctrl_words[] = {
     L3GD20_CTRL_REG1_X_EN_BIT | L3GD20_CTRL_REG1_Y_EN_BIT |
         L3GD20_CTRL_REG1_Z_EN_BIT |
@@ -173,7 +181,8 @@ int l3gd20_init(const struct device* dev)
     ,
     0  // CTRL_REG3: TODO: INT1/2 + FIFO configuration
     ,
-    L3GD20_CTRL_REG4_BDU_BIT  // CTRL_REG4: Enable BDU, TODO: BDU, BLE, scale selection
+    L3GD20_CTRL_REG4_BDU_BIT |
+        ctrl_reg4_ble_bit  // CTRL_REG4: Enable BDU, set Endianness, TODO: scale selection
     ,
     0  // CTRL_REG5: TODO: Block configuration
   };
