@@ -12,10 +12,10 @@
 
 #define L3GD20_WHOAMI 0xD4
 
-#define L3GD20_PD_BIT BIT(3)
-#define L3GD20_Z_EN_BIT BIT(2)
-#define L3GD20_Y_EN_BIT BIT(1)
-#define L3GD20_X_EN_BIT BIT(0)
+#define L3GD20_CTRL_REG1_PD_BIT BIT(3)
+#define L3GD20_CTRL_REG1_Z_EN_BIT BIT(2)
+#define L3GD20_CTRL_REG1_Y_EN_BIT BIT(1)
+#define L3GD20_CTRL_REG1_X_EN_BIT BIT(0)
 
 enum l3gd20_sample_gyro_idx
 {

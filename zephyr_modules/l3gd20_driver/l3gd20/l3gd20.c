@@ -159,11 +159,19 @@ int l3gd20_init(const struct device* dev)
     return -EINVAL;
   }
 
+  /*
+   * Start device initalization
+   */
+
+  uint8_t ctrl_words[] = {
+    L3GD20_CTRL_REG1_X_EN_BIT | L3GD20_CTRL_REG1_Y_EN_BIT |
+    L3GD20_CTRL_REG1_Z_EN_BIT |
+    L3GD20_CTRL_REG1_PD_BIT  // Go to normal mode and enable axes, TODO: Bandwith + ODR
+  };
+
   // Set CTRL_REG_1
-  uint8_t ctrl1_word =
-      L3GD20_X_EN_BIT | L3GD20_Y_EN_BIT | L3GD20_Z_EN_BIT | L3GD20_PD_BIT;
   L3GD20_RET_VAL_IF_ERR(l3gd20_write_reg(data->bus, &cfg->spi_conf,
-                                         L3GD20_REG_CTRL_REG1, &ctrl1_word),
+                                         L3GD20_REG_CTRL_REG1, &ctrl_words[0]),
                         -EIO);
 
   // Read temperature offset
