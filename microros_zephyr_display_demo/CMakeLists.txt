@@ -33,3 +33,8 @@ if(BUILD_TESTING)
 endif()
 
 ament_package()
+
+install(
+  DIRECTORY launch
+  DESTINATION share/${PROJECT_NAME}/
+)
