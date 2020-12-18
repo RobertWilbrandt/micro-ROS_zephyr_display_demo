@@ -66,6 +66,8 @@ struct l3gd20_config
   struct spi_config spi_conf;
   const char* spi_bus_label;
   const char* spi_cs_label;
+
+  int full_scale;  // Full scale in dps
 };
 
 #endif  // MICRO_ROS_ZEPYR_DISPLAY_DEMO_DRIVERS_SENSORS_L3GD20_L3GD20_H

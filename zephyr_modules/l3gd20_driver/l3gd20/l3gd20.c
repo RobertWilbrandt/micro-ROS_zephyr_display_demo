@@ -16,17 +16,23 @@
 #include <errno.h>
 #include <init.h>
 
-void l3gd20_convert_temp(const struct l3gd20_data* l3gd20_data,
-                         uint8_t sample_raw, struct sensor_value* val)
+void l3gd20_convert_temp(const struct device* dev, uint8_t sample_raw,
+                         struct sensor_value* val)
 {
   val->val1 = (int8_t)sample_raw;
   val->val2 = 0;
 }
 
-void l3gd20_convert_gyro(const struct l3gd20_data* l3gd20_data, uint16_t sample,
+void l3gd20_convert_gyro(const struct device* dev, uint16_t sample,
                          struct sensor_value* val)
 {
-  val->val1 = (int16_t)sample;  // TODO: Scaling
+  const struct l3gd20_config* cfg = dev->config;
+
+  // TODO: I suspect this could be done more accurately
+  const double scaled_sample =
+      ((double)cfg->full_scale * (int16_t)sample) / INT16_MAX;
+  val->val1 = (int32_t)scaled_sample;
+  val->val2 = (int32_t)((scaled_sample - val->val1) * 1000000.l);
 }
 
 int l3gd20_sample_fetch(const struct device* dev, enum sensor_channel chan)
@@ -94,25 +100,25 @@ static int l3gd20_channel_get(const struct device* dev,
   switch (chan)
   {
     case SENSOR_CHAN_DIE_TEMP:
-      l3gd20_convert_temp(data, data->last_sample.temp, val);
+      l3gd20_convert_temp(dev, data->last_sample.temp, val);
       return 0;
     case SENSOR_CHAN_GYRO_X:
-      l3gd20_convert_gyro(data, data->last_sample.gyro[L3GD20_SAMPLE_GYRO_X],
+      l3gd20_convert_gyro(dev, data->last_sample.gyro[L3GD20_SAMPLE_GYRO_X],
                           val);
       return 0;
     case SENSOR_CHAN_GYRO_Y:
-      l3gd20_convert_gyro(data, data->last_sample.gyro[L3GD20_SAMPLE_GYRO_Y],
+      l3gd20_convert_gyro(dev, data->last_sample.gyro[L3GD20_SAMPLE_GYRO_Y],
                           val);
       return 0;
     case SENSOR_CHAN_GYRO_Z:
-      l3gd20_convert_gyro(data, data->last_sample.gyro[L3GD20_SAMPLE_GYRO_Z],
+      l3gd20_convert_gyro(dev, data->last_sample.gyro[L3GD20_SAMPLE_GYRO_Z],
                           val);
       return 0;
     case SENSOR_CHAN_GYRO_XYZ:
       for (size_t i = 0; i < 3; ++i)
       {
         l3gd20_convert_gyro(
-            data, data->last_sample.gyro[L3GD20_SAMPLE_GYRO_X + i], &val[i]);
+            dev, data->last_sample.gyro[L3GD20_SAMPLE_GYRO_X + i], &val[i]);
       }
       return 0;
 
@@ -220,7 +226,8 @@ int l3gd20_init(const struct device* dev)
                   .slave = DT_INST_REG_ADDR(inst),                             \
                   .cs = &l3gd20_data_##inst.cs_ctrl },                         \
     .spi_bus_label = DT_INST_BUS_LABEL(inst),                                  \
-    .spi_cs_label = DT_INST_SPI_DEV_CS_GPIOS_LABEL(inst)                       \
+    .spi_cs_label = DT_INST_SPI_DEV_CS_GPIOS_LABEL(inst),                      \
+    .full_scale = 250                                                          \
   };                                                                           \
                                                                                \
   DEVICE_AND_API_INIT(l3gd20_##inst, DT_INST_LABEL(inst), &l3gd20_init,        \
