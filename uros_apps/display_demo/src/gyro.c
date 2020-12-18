@@ -7,6 +7,7 @@
 
 #include <zephyr.h>
 #include <stdio.h>
+#include <math.h>
 
 #include "display.h"
 #include "uros.h"
@@ -26,6 +27,12 @@
 #define GYRO_LABEL_FORMAT "Using onboard sensor '%s'"
 #define GYRO_LABEL_FULL_LEN sizeof(GYRO_LABEL_FORMAT) - 1 + sizeof(GYRO_LABEL)
 const struct device* gyro_dev;
+
+// Utility functions
+#ifndef M_PI
+#define M_PI 3.14159265358979323846
+#endif  // ifndef M_PI
+double deg_to_rad(double deg);
 
 // UROS handles
 struct uros_pub_handle uros_temp_pub;
@@ -146,9 +153,9 @@ void gyro_imu_timer_cb(rcl_timer_t* timer, int64_t last_call_time)
   memset(&imu_msg.linear_acceleration_covariance[1], 0, 8);
 
   // Indicate that we don't know the covariance of our angular velocity
-  imu_msg.angular_velocity.x = sensor_value_to_double(&data[0]);
-  imu_msg.angular_velocity.y = sensor_value_to_double(&data[1]);
-  imu_msg.angular_velocity.z = sensor_value_to_double(&data[2]);
+  imu_msg.angular_velocity.x = deg_to_rad(sensor_value_to_double(&data[0]));
+  imu_msg.angular_velocity.y = deg_to_rad(sensor_value_to_double(&data[1]));
+  imu_msg.angular_velocity.z = deg_to_rad(sensor_value_to_double(&data[2]));
   memset(imu_msg.angular_velocity_covariance, 0, 9);
 
   struct timespec ts;
@@ -161,6 +168,11 @@ void gyro_imu_timer_cb(rcl_timer_t* timer, int64_t last_call_time)
     atomic_set(&status, STATUS_ERROR);
     return;
   }
+}
+
+double deg_to_rad(double deg)
+{
+  return deg / 180 * M_PI;
 }
 
 // We don't have a gyro -> listen to uros instead
