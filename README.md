@@ -1,3 +1,5 @@
+[![Build badge](https://github.com/RobertWilbrandt/micro-ROS_zephyr_display_demo/workflows/CI/badge.svg?branch=foxy&event=push)](https://github.com/RobertWilbrandt/micro-ROS_zephyr_display_demo/actions)
+
 # micro-ROS Zephyr Display demo
 
 This project showcases the use of a display peripheral on the [stm32f429i-disc1](https://www.st.com/en/evaluation-tools/32f429idiscovery.html) board in the [ROS 2 framework](https://index.ros.org/doc/ros2/) using [micro-ROS](https://micro-ros.github.io/), [LVGL](https://lvgl.io/) and the [Zephyr RTOS](https://zephyrproject.org/).
