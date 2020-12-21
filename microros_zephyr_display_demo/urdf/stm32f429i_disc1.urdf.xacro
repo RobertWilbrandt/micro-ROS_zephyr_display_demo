@@ -1,0 +1,11 @@
+<?xml version="1.0"?>
+
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro"
+       name="stm32f429i_disc1">
+
+  <!-- Include macro for MCU board -->
+  <xacro:include filename="$(find microros_zephyr_display_demo)/urdf/stm32f429i_disc1.xacro" />
+
+  <xacro:stm32f429i_disc1 prefix="" />
+
+</robot>

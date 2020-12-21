@@ -1,0 +1,25 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+  <material name="stm32f429i_disc1_pcb_material">
+    <color rgba="0.09 0.77 0.28 1.0" />
+  </material>
+
+  <xacro:macro name="stm32f429i_disc1" params="prefix">
+
+    <xacro:property name="board_pcb_height" value="0.00157" />
+
+    <link name="${prefix}base_link">
+      <visual>
+        <origin xyz="0 0 ${board_pcb_height/2}" rpy="0 0 0" />
+        <geometry>
+          <box size="0.1193 0.066 ${board_pcb_height}" />
+        </geometry>
+        <material name="stm32f429i_disc1_pcb_material" />
+      </visual>
+
+    </link>
+
+  </xacro:macro>
+
+</robot>
