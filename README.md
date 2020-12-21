@@ -22,7 +22,8 @@ Inside this workspace, you start by cloning this repository:
 ```console
 $ ls
 build  firmware  install  log  src
-$ git clone https://github.com/RobertWilbrandt/micro-ROS_zephyr_display_demo src/micro-ROS_zephyr_display_demo
+$ git clone https://github.com/RobertWilbrandt/micro-ROS_zephyr_display_demo \
+    src/micro-ROS_zephyr_display_demo
 ```
 
 You now need to export ```UROS_CUSTOM_APP_FOLDER``` to let *micro-ROS* know where to look for the microcontroller application. After this, you should be able to build and flash the application to your board:
