@@ -15,20 +15,23 @@ I hope this project can still serve as a demonstrator and template for *micro-RO
 
 ## Building
 
-These instructions assume you already have a working *micro-ROS* workspace setup at ```<uros_ws_path>```, configured for the correct microcontroller board.
-Now you can clone this repo to some other location
+This project is set up so that it can be built right inside a ROS 2 workspace. This section assumes you already have a *micro-ROS* workspace set up for this, if you haven't you can take a look at the [micro-ROS tutorial](https://micro-ros.github.io/docs/tutorials/core/first_application_rtos/zephyr/).
+
+Inside this workspace, you start by cloning this repository:
 
 ```console
-$ cd <zephyr_demo_path>
-$ git clone https://github.com/RobertWilbrandt/micro-ROS_zephyr_display_demo
+$ ls
+build  firmware  install  log  src
+$ git clone https://github.com/RobertWilbrandt/micro-ROS_zephyr_display_demo src/micro-ROS_zephyr_display_demo
 ```
 
-and use the ```UROS_CUSTOM_APP_FOLDER``` environment variable to build and flash the firmware:
+You now need to export ```UROS_CUSTOM_APP_FOLDER``` to let *micro-ROS* know where to look for the microcontroller application. After this, you should be able to build and flash the application to your board:
 
 ```console
-$ cd <uros_ws_path>
-$ source install/setup.zsh  # Depending on the shell you use
-$ export UROS_CUSTOM_APP_FOLDER=<zephyr_demo_path>/uros_apps
+$ source /opt/ros/foxy/setup.bash
+$ colcon build
+$ source install/setup.zsh
+$ export UROS_CUSTOM_APP_FOLDER=$(pwd)/src/micro-ROS_zephyr_display_demo/uros_apps
 $ ros2 run micro_ros_setup build_firmware.sh -f
 $ ros2 run micro_ros_setup flash_firmware.sh
 ```
