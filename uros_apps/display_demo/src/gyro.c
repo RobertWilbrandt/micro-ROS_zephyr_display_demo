@@ -135,7 +135,7 @@ void gyro_imu_timer_cb(rcl_timer_t* timer, int64_t last_call_time)
   }
 
   sensor_msgs__msg__Imu imu_msg = { 0 };
-  imu_msg.header.frame_id.data = "";
+  imu_msg.header.frame_id.data = "base_link";
   imu_msg.header.frame_id.size = strlen(imu_msg.header.frame_id.data);
 
   // Indicate that we cannot measure orientation and linear acceleration
@@ -152,11 +152,15 @@ void gyro_imu_timer_cb(rcl_timer_t* timer, int64_t last_call_time)
   imu_msg.linear_acceleration_covariance[0] = -1.0;
   memset(&imu_msg.linear_acceleration_covariance[1], 0, 8);
 
-  // Indicate that we don't know the covariance of our angular velocity
   imu_msg.angular_velocity.x = deg_to_rad(sensor_value_to_double(&data[0]));
   imu_msg.angular_velocity.y = deg_to_rad(sensor_value_to_double(&data[1]));
   imu_msg.angular_velocity.z = deg_to_rad(sensor_value_to_double(&data[2]));
+
+  // Pretend we know the exact angular velocities
   memset(imu_msg.angular_velocity_covariance, 0, 9);
+  imu_msg.angular_velocity_covariance[0] = 1.0;
+  imu_msg.angular_velocity_covariance[4] = 1.0;
+  imu_msg.angular_velocity_covariance[8] = 1.0;
 
   struct timespec ts;
   clock_gettime(CLOCK_REALTIME, &ts);
