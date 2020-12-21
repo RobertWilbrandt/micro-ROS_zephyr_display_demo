@@ -26,7 +26,10 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
+import os
+
 import launch_ros.actions
+from ament_index_python.packages import get_package_share_directory
 from launch import LaunchDescription
 
 
@@ -35,9 +38,16 @@ def generate_launch_description():
         [
             launch_ros.actions.Node(
                 package="robot_localization",
-                executable="ukf_node",
-                name="ukf_filter_node",
+                executable="ekf_node",
+                name="state_estimation_node",
                 output="screen",
+                parameters=[
+                    os.path.join(
+                        get_package_share_directory("microros_zephyr_display_demo"),
+                        "params",
+                        "ekf.yaml",
+                    )
+                ],
             )
         ]
     )
